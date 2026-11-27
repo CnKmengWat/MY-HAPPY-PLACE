@@ -1,18 +1,38 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  Armchair,
   ArrowLeft,
   ArrowUpDown,
+  BarChart2,
   Bell,
+  Calendar,
   Camera,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   Coffee,
+  Copy,
+  Crown,
+  Dice5,
   Disc3,
+  Eye,
+  EyeOff,
+  Feather,
   Flag,
+  Flame,
+  Gamepad2,
   Gift,
+  Globe,
   Headphones,
   Heart,
   Home,
   ImagePlus,
+  LayoutGrid,
   ListMusic,
+  Lock,
+  LogOut,
+  Menu,
   MessageCircle,
   Mic,
   MicOff,
@@ -22,17 +42,27 @@ import {
   Music,
   Palette,
   Pause,
+  Pencil,
+  Phone,
   Play,
   Plus,
   Save,
   Search,
   Send,
+  Settings,
+  Share2,
+  Shield,
+  ShoppingBag,
   SkipBack,
   SkipForward,
+  SlidersHorizontal,
   Smile,
   Sparkles,
+  SquarePen,
+  Star,
   Timer,
   Trophy,
+  Unlock,
   Upload,
   User,
   UserCheck,
@@ -41,18 +71,57 @@ import {
   Users,
   Volume2,
   VolumeX,
-  Zap,
-  Check,
+  Wand2,
   X,
+  Zap,
 } from 'lucide-react';
 
-type TabId = 'home' | 'match' | 'party' | 'chat' | 'me' | 'game' | 'gifts';
+type TabId = 'home' | 'party' | 'feed' | 'chat' | 'me' | 'game' | 'gifts';
 
 interface ChatMessage {
   id: number;
   text: string;
   isFromMe: boolean;
   timestamp: number;
+}
+
+interface OnlineStatusPerson {
+  id: string;
+  name: string;
+  gender: 'male' | 'female';
+  age: number;
+  status: string;
+  region: 'domestic' | 'worldwide';
+  avatarBg: string;
+}
+
+interface MomentTopic {
+  id: string;
+  label: string;
+  gradient: string;
+  emoji: string;
+}
+
+interface MomentComment {
+  id: number;
+  author: string;
+  text: string;
+}
+
+interface MomentPost {
+  id: string;
+  author: string;
+  gender: 'male' | 'female';
+  age: number;
+  timeAgo: string;
+  caption: string;
+  topicId?: string;
+  imageBg?: string;
+  imageEmoji?: string;
+  likes: number;
+  comments: MomentComment[];
+  shares: number;
+  tab: 'following' | 'foryou' | 'latest';
 }
 
 type RoomMoodId = 'happy' | 'chill' | 'energetic' | 'cozy' | 'music';
@@ -89,6 +158,9 @@ interface VoiceRoom {
   isActive?: boolean;
   backgroundId?: PartyBackgroundId;
   customBackground?: string | null;
+  partyMode?: 'Free Mic' | 'Music Lounge' | 'Karaoke' | 'Truth or Dare';
+  welcomeMessage?: string;
+  isLocked?: boolean;
   createdAt?: number;
 }
 
@@ -144,14 +216,95 @@ interface BattleParticipant {
   bgEnd: string;
 }
 
-const TABS: { id: TabId; label: string; icon: typeof Home }[] = [
+const MOBILE_TABS: { id: TabId; label: string; icon: typeof Home }[] = [
   { id: 'home', label: 'Home', icon: Home },
-  { id: 'match', label: 'Match', icon: Heart },
-  { id: 'party', label: 'Party', icon: Headphones },
+  { id: 'party', label: 'Party', icon: Mic },
+  { id: 'feed', label: 'Moments', icon: Globe },
   { id: 'chat', label: 'Chat', icon: MessageCircle },
   { id: 'me', label: 'Me', icon: User },
-  { id: 'game', label: 'Game', icon: Trophy },
-  { id: 'gifts', label: 'Gifts', icon: Gift },
+];
+
+const SIDEBAR_TABS: { id: TabId; label: string; icon: typeof Home }[] = [
+  ...MOBILE_TABS,
+  { id: 'game', label: 'Battle', icon: Trophy },
+  { id: 'gifts', label: 'Shop', icon: ShoppingBag },
+];
+
+const INITIAL_ONLINE_STATUSES: OnlineStatusPerson[] = [
+  { id: 'st-1', name: 'Mina', gender: 'female', age: 21, status: 'ត្រឹមជាក្មេងកាតឿម្នាក់ហេ😜😉', region: 'domestic', avatarBg: 'linear-gradient(135deg, #2DD4BF, #0EA5E9)' },
+  { id: 'st-2', name: 'VITA', gender: 'male', age: 21, status: 'ចង់មានសង្សារដែរ😢🇰🇭', region: 'domestic', avatarBg: 'linear-gradient(135deg, #3B82F6, #6366F1)' },
+  { id: 'st-3', name: 'លីដា', gender: 'female', age: 20, status: 'like chat', region: 'domestic', avatarBg: 'linear-gradient(135deg, #34D399, #10B981)' },
+  { id: 'st-4', name: 'ah thy CG', gender: 'male', age: 18, status: '💦 Acoustic night?', region: 'domestic', avatarBg: 'linear-gradient(135deg, #60A5FA, #8B5CF6)' },
+  { id: 'st-5', name: 'TONG CG', gender: 'male', age: 18, status: 'ចង់ស្តាប់ខ្ញុំច្រៀងអត់ឆាតមក😊💗', region: 'worldwide', avatarBg: 'linear-gradient(135deg, #64748B, #334155)' },
+  { id: 'st-6', name: 'Sophy', gender: 'female', age: 22, status: 'Hi my name is Sophy ✨', region: 'worldwide', avatarBg: 'linear-gradient(135deg, #EC4899, #8B5CF6)' },
+  { id: 'st-7', name: 'Dara', gender: 'male', age: 24, status: 'Hot mic tonight!', region: 'domestic', avatarBg: 'linear-gradient(135deg, #EF4444, #F97316)' },
+];
+
+const MOMENT_TOPICS: MomentTopic[] = [
+  { id: 't-1', label: 'ប្រទីបខ្មែរបែបទំនើប', gradient: 'linear-gradient(135deg, #7C3AED, #EC4899)', emoji: '🏮' },
+  { id: 't-2', label: 'អុំទូកឆ្នាំនេះ', gradient: 'linear-gradient(135deg, #0EA5E9, #2563EB)', emoji: '🚣' },
+  { id: 't-3', label: 'ថ្ងៃនេះញ៉ាំអី', gradient: 'linear-gradient(135deg, #F59E0B, #EA580C)', emoji: '🍜' },
+  { id: 't-4', label: 'ពាក្យក្នុងចិត្ត', gradient: 'linear-gradient(135deg, #F472B6, #FB7185)', emoji: '💌' },
+  { id: 't-5', label: 'សាកទាយតារានិករ', gradient: 'linear-gradient(135deg, #6366F1, #4338CA)', emoji: '🔮' },
+];
+
+const INITIAL_MOMENT_POSTS: MomentPost[] = [
+  {
+    id: 'm-1',
+    author: 'ស្រីនាង',
+    gender: 'female',
+    age: 26,
+    timeAgo: 'Active 2 hours ago',
+    caption: 'ល្ងាចនេះរ៉ូម៉ែនទិក ជាមួយទេសភាពមាត់ទន្លេ 🌸✨',
+    topicId: 't-1',
+    imageBg: 'linear-gradient(135deg, #581C87 0%, #BE185D 55%, #1E1B4B 100%)',
+    imageEmoji: '💃✨',
+    likes: 124,
+    comments: [{ id: 1, author: 'Mina', text: 'So pretty tonight!' }],
+    shares: 8,
+    tab: 'foryou',
+  },
+  {
+    id: 'm-2',
+    author: 'Lii',
+    gender: 'male',
+    age: 18,
+    timeAgo: 'Active now',
+    caption: 'គ្មានអ្វីស្រួលជាង.... ទេ? សូមបំពេញចន្លោះ? ។🤭',
+    topicId: 't-4',
+    likes: 18,
+    comments: [{ id: 2, author: 'Dara', text: 'Sleeping early 😂' }],
+    shares: 3,
+    tab: 'foryou',
+  },
+  {
+    id: 'm-3',
+    author: 'Ah JM🥹💦',
+    gender: 'female',
+    age: 23,
+    timeAgo: 'Active 33 mins ago',
+    caption: 'បើប្រទេសគ្មានច្បាប់ធ្វើអីមុនគេ.........?',
+    topicId: 't-5',
+    likes: 6,
+    comments: [{ id: 3, author: 'Sophy', text: 'Sing all night in Party Chat!' }],
+    shares: 1,
+    tab: 'latest',
+  },
+  {
+    id: 'm-4',
+    author: 'Mina',
+    gender: 'female',
+    age: 21,
+    timeAgo: 'Active 12 mins ago',
+    caption: 'កាហ្វេមួយកែវ និងបទចម្រៀងស្ងប់ស្ងាត់ ☕🎶',
+    topicId: 't-3',
+    imageBg: 'linear-gradient(135deg, #1E293B 0%, #4C1D95 100%)',
+    imageEmoji: '☕🎶',
+    likes: 42,
+    comments: [],
+    shares: 5,
+    tab: 'following',
+  },
 ];
 
 interface FriendPerson {
@@ -585,10 +738,25 @@ export default function App() {
       { id: 4, giftName: 'នំចាក់ចាន់', emoji: '🍰', price: 35, isSent: true, peerName: 'Sophy', timestamp: now - 172_800_000 },
     ];
   });
-  const [displayName, setDisplayName] = useState('My Happy Place Member');
+  const [displayName, setDisplayName] = useState('និងហើយៗចូលចិត្ត');
   const [bio, setBio] = useState('Here to make happy memories ✨');
+  const [userStatusText, setUserStatusText] = useState('');
+  const [userOccupation, setUserOccupation] = useState('Merchant/trader');
+  const [userInterests, setUserInterests] = useState<string[]>(['Merchant/Trader', 'Coffee']);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
+  const [onlineStatuses, setOnlineStatuses] = useState<OnlineStatusPerson[]>(INITIAL_ONLINE_STATUSES);
+  const [momentPosts, setMomentPosts] = useState<MomentPost[]>(INITIAL_MOMENT_POSTS);
+  const [likedPostIds, setLikedPostIds] = useState<string[]>([]);
+  const [followingAuthors, setFollowingAuthors] = useState<string[]>(['Mina']);
+  const [claimedFreeDiamonds, setClaimedFreeDiamonds] = useState(false);
+  const [showSoulMatchModal, setShowSoulMatchModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showComposeMomentModal, setShowComposeMomentModal] = useState(false);
+  const [statusDraft, setStatusDraft] = useState('');
+  const [momentDraft, setMomentDraft] = useState('');
+  const [momentTopicDraft, setMomentTopicDraft] = useState<string>(MOMENT_TOPICS[0].id);
+  const [soulMatchedPerson, setSoulMatchedPerson] = useState<string | null>(null);
 
   const sendMessage = (friendName: string, rawText: string) => {
     const trimmed = rawText.trim();
@@ -798,29 +966,24 @@ export default function App() {
     );
   }
 
-  const isDarkTab = selectedTab === 'game' || selectedTab === 'gifts';
   const bgClass =
     selectedTab === 'game'
       ? 'bg-[#101A3B]'
       : selectedTab === 'gifts'
         ? 'bg-[#171421]'
-        : selectedTab === 'match'
-          ? 'bg-[#F5F0FF]'
-          : 'bg-[#FFFBFF]';
+        : 'bg-[#16151B]';
+
+  const unreadChatCount = 2;
 
   return (
-    <div className={`min-h-screen flex flex-col md:flex-row ${bgClass}`}>
-      <aside
-        className={`hidden md:flex md:flex-col md:w-56 lg:w-64 shrink-0 border-r p-4 sticky top-0 h-screen ${
-          isDarkTab ? 'bg-[#131120] border-white/10 text-white' : 'bg-white border-[#F5F0FF] text-[#251B3A]'
-        }`}
-      >
+    <div className={`min-h-screen flex flex-col md:flex-row text-white ${bgClass}`}>
+      <aside className="hidden md:flex md:flex-col md:w-56 lg:w-64 shrink-0 border-r border-white/10 bg-[#121117] p-4 sticky top-0 h-screen text-white">
         <div className="px-3 py-3 mb-4">
-          <div className="text-[#8B5CF6] text-[11px] font-bold tracking-[2px]">MY HAPPY PLACE</div>
-          <div className="text-xs opacity-65 mt-0.5 truncate">{displayName}</div>
+          <div className="text-[#A78BFA] text-[11px] font-bold tracking-[2px]">MY HAPPY PLACE</div>
+          <div className="text-xs text-white/65 mt-0.5 truncate">{displayName}</div>
         </div>
         <nav className="flex-1 space-y-1">
-          {TABS.map((tab) => {
+          {SIDEBAR_TABS.map((tab) => {
             const Icon = tab.icon;
             const active = selectedTab === tab.id;
             return (
@@ -828,29 +991,28 @@ export default function App() {
                 key={tab.id}
                 type="button"
                 onClick={() => setSelectedTab(tab.id)}
-                className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-sm font-semibold transition-colors cursor-pointer ${
+                className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 text-sm font-semibold transition-colors cursor-pointer ${
                   active
-                    ? isDarkTab
-                      ? 'bg-[#8B5CF6] text-white'
-                      : 'bg-[#F5F0FF] text-[#8B5CF6]'
-                    : isDarkTab
-                      ? 'text-white/75 hover:bg-white/10 hover:text-white'
-                      : 'text-[#8B8298] hover:bg-[#F5F0FF]/50 hover:text-[#251B3A]'
+                    ? 'bg-[#8B5CF6] text-white'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <Icon className="w-5 h-5 shrink-0" />
-                <span>{tab.label}</span>
+                <span className="flex items-center gap-3">
+                  <Icon className="w-5 h-5 shrink-0" />
+                  <span>{tab.label}</span>
+                </span>
+                {tab.id === 'chat' && unreadChatCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-[#FF4D6D] text-white text-[10px] font-bold tabular-nums">
+                    {unreadChatCount}
+                  </span>
+                )}
               </button>
             );
           })}
           <button
             type="button"
             onClick={() => setShowFamily(true)}
-            className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-sm font-semibold transition-colors cursor-pointer ${
-              isDarkTab
-                ? 'text-white/75 hover:bg-white/10 hover:text-white'
-                : 'text-[#8B8298] hover:bg-[#F5F0FF]/50 hover:text-[#251B3A]'
-            }`}
+            className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
           >
             <Users className="w-5 h-5 shrink-0" />
             <span>Family</span>
@@ -858,26 +1020,18 @@ export default function App() {
           <button
             type="button"
             onClick={() => setShowFriends(true)}
-            className={`w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 text-sm font-semibold transition-colors cursor-pointer ${
-              isDarkTab
-                ? 'text-white/75 hover:bg-white/10 hover:text-white'
-                : 'text-[#8B8298] hover:bg-[#F5F0FF]/50 hover:text-[#251B3A]'
-            }`}
+            className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
           >
             <span className="flex items-center gap-3">
               <UserPlus className="w-5 h-5 shrink-0" />
               <span>Friends</span>
             </span>
             {friendRequests.length > 0 && (
-              <span className="text-xs font-bold text-[#8B5CF6] tabular-nums">{friendRequests.length}</span>
+              <span className="text-xs font-bold text-[#A78BFA] tabular-nums">{friendRequests.length}</span>
             )}
           </button>
         </nav>
-        <div
-          className={`mt-auto px-3 py-2.5 rounded-xl text-xs font-bold tabular-nums ${
-            isDarkTab ? 'bg-white/5 text-[#70D9FF]' : 'bg-[#F5F0FF] text-[#8B5CF6]'
-          }`}
-        >
+        <div className="mt-auto px-3 py-2.5 rounded-xl bg-white/5 text-[#70D9FF] text-xs font-bold tabular-nums">
           💎 {diamonds} Diamonds
         </div>
       </aside>
@@ -886,28 +1040,23 @@ export default function App() {
         <div className="max-w-5xl mx-auto min-h-full">
           {selectedTab === 'home' && (
             <HomeView
-              rooms={rooms.slice(0, 2)}
-              currentFamily={currentFamily}
-              musicCount={musicLibrary.length}
+              statuses={onlineStatuses}
+              rooms={rooms}
               friends={friends}
-              friendRequestCount={friendRequests.length}
-              reportedRoomIds={reportedRoomIds}
+              userStatusText={userStatusText}
               onChat={setOpenedChat}
               onTab={setSelectedTab}
-              onJoinRoom={setActiveVoiceRoom}
-              onReportRoom={setReportingRoom}
-              onOpenFamily={() => setShowFamily(true)}
+              onOpenSoulMatch={() => setShowSoulMatchModal(true)}
+              onJoinVoiceGame={() => {
+                const target = rooms[0];
+                if (target) setActiveVoiceRoom(target);
+              }}
               onOpenFriends={() => setShowFriends(true)}
               onAddFriend={handleAddFriend}
-              onRemoveFriend={handleRemoveFriend}
-              onOpenAddMusic={() => setShowAddMusicModal(true)}
-            />
-          )}
-          {selectedTab === 'match' && (
-            <MatchView
-              friends={friends}
-              onAddFriend={handleAddFriend}
-              onChat={setOpenedChat}
+              onOpenStatusModal={() => {
+                setStatusDraft(userStatusText);
+                setShowStatusModal(true);
+              }}
             />
           )}
           {selectedTab === 'party' && (
@@ -918,18 +1067,23 @@ export default function App() {
               onJoinRoom={setActiveVoiceRoom}
               onReportRoom={setReportingRoom}
               onOpenAddMusic={() => setShowAddMusicModal(true)}
-              onCreateRoom={(title, moodId, backgroundId) => {
-                const moodMeta = getRoomMood(moodId);
+              onOpenFamily={() => setShowFamily(true)}
+              onOpenShop={() => setSelectedTab('gifts')}
+              onCreateRoom={({ title, mood, backgroundId, partyMode, welcomeMessage, isLocked }) => {
+                const moodMeta = getRoomMood(mood);
                 const created: VoiceRoom = {
                   id: `room-${Date.now()}`,
                   title,
-                  detail: '1 person · 1 speaker',
-                  mood: moodId,
+                  detail: `1 person · ${partyMode}`,
+                  mood,
                   color: moodMeta.color,
                   listeners: 1,
                   speakers: ['You'],
                   owner: 'You',
                   backgroundId,
+                  partyMode,
+                  welcomeMessage,
+                  isLocked,
                   createdAt: Date.now(),
                 };
                 setRooms((prev) => [created, ...prev]);
@@ -937,92 +1091,157 @@ export default function App() {
               }}
             />
           )}
+          {selectedTab === 'feed' && (
+            <MomentsFeedView
+              posts={momentPosts}
+              likedPostIds={likedPostIds}
+              followingAuthors={followingAuthors}
+              onToggleLike={(postId) => {
+                const isLiked = likedPostIds.includes(postId);
+                setLikedPostIds((prev) => (isLiked ? prev.filter((id) => id !== postId) : [...prev, postId]));
+                setMomentPosts((prev) =>
+                  prev.map((p) => (p.id === postId ? { ...p, likes: Math.max(0, p.likes + (isLiked ? -1 : 1)) } : p)),
+                );
+              }}
+              onAddComment={(postId, text) => {
+                const clean = text.trim();
+                if (!clean) return;
+                setMomentPosts((prev) =>
+                  prev.map((p) =>
+                    p.id === postId
+                      ? { ...p, comments: [...p.comments, { id: Date.now(), author: 'You', text: clean }] }
+                      : p,
+                  ),
+                );
+              }}
+              onSharePost={(postId) => {
+                setMomentPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, shares: p.shares + 1 } : p)));
+                setReportToast('Shared post with your friends!');
+              }}
+              onToggleFollow={(author) => {
+                setFollowingAuthors((prev) =>
+                  prev.includes(author) ? prev.filter((a) => a !== author) : [...prev, author],
+                );
+              }}
+              onSayHi={(author) => setOpenedChat(author)}
+              onOpenCompose={() => setShowComposeMomentModal(true)}
+            />
+          )}
           {selectedTab === 'chat' && (
-            <div className="pb-8">
-              <div className="px-5 py-4 flex items-center justify-between gap-3">
-                <div>
-                  <h1 className="text-[27px] font-extrabold text-[#251B3A]">Messages</h1>
-                  <p className="text-[13px] text-[#8B8298]">
-                    Your conversations · {friends.length} friends
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowFriends(true)}
-                  className="min-h-[44px] px-4 rounded-full bg-[#8B5CF6] hover:bg-[#7C4DFF] text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap transition-colors"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  <span>Add friends</span>
-                </button>
-              </div>
-              <div className="max-w-2xl space-y-0.5">
-                {friends.map((name) => {
-                  const preview = conversations[name]?.at(-1)?.text ?? 'Tap to open conversation';
-                  return (
-                    <button
-                      key={name}
-                      type="button"
-                      onClick={() => setOpenedChat(name)}
-                      className="w-full flex items-center gap-3 px-5 py-2.5 text-left hover:bg-[#F5F0FF]/70 rounded-xl cursor-pointer min-h-[62px]"
-                    >
-                      <AvatarBadge name={name} />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[#251B3A] font-bold text-[15px] truncate">{name}</div>
-                        <div className="text-[#8B8298] text-xs truncate">{preview}</div>
-                      </div>
-                      <MessageCircle className="w-5 h-5 text-[#8B5CF6] shrink-0" />
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+            <ChatTabView
+              friends={friends}
+              conversations={conversations}
+              claimedFreeDiamonds={claimedFreeDiamonds}
+              onClaimFreeDiamonds={() => {
+                if (claimedFreeDiamonds) {
+                  setReportToast('Daily Free Diamonds already claimed! Visit Shop anytime 💎');
+                  return;
+                }
+                setClaimedFreeDiamonds(true);
+                setDiamonds((d) => d + 15);
+                setReportToast('You won +15 Free Diamonds 💎!');
+              }}
+              onOpenFriends={() => setShowFriends(true)}
+              onOpenParty={() => {
+                if (rooms[0]) setActiveVoiceRoom(rooms[0]);
+                else setSelectedTab('party');
+              }}
+              onOpenGifts={() => setSelectedTab('gifts')}
+              onChat={setOpenedChat}
+            />
           )}
           {selectedTab === 'me' && (
             <ProfileView
               displayName={displayName}
               bio={bio}
+              userStatusText={userStatusText}
+              userOccupation={userOccupation}
+              userInterests={userInterests}
               profilePhoto={profilePhoto}
               coverPhoto={coverPhoto}
+              diamonds={diamonds}
               giftHistory={giftHistory}
               currentFamily={currentFamily}
               friendsCount={friends.length}
               friendRequestCount={friendRequests.length}
+              rooms={rooms}
+              posts={momentPosts}
               onOpenFriends={() => setShowFriends(true)}
               onOpenFamily={() => setShowFamily(true)}
+              onOpenShop={() => setSelectedTab('gifts')}
+              onOpenGame={() => setSelectedTab('game')}
+              onOpenAddMusic={() => setShowAddMusicModal(true)}
+              onOpenStatusModal={() => {
+                setStatusDraft(userStatusText);
+                setShowStatusModal(true);
+              }}
+              onOpenCompose={() => setShowComposeMomentModal(true)}
+              onJoinMyRoom={() => {
+                if (rooms[0]) setActiveVoiceRoom(rooms[0]);
+                else setSelectedTab('party');
+              }}
               onSave={(next) => {
                 setDisplayName(next.displayName);
                 setBio(next.bio);
+                setUserOccupation(next.occupation);
+                setUserInterests(next.interests);
                 setProfilePhoto(next.profilePhoto);
                 setCoverPhoto(next.coverPhoto);
               }}
             />
           )}
-          {selectedTab === 'game' && <HumanBattleView />}
+          {selectedTab === 'game' && (
+            <div>
+              <div className="px-4 pt-3 md:hidden">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTab('me')}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-white cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to Profile</span>
+                </button>
+              </div>
+              <HumanBattleView />
+            </div>
+          )}
           {selectedTab === 'gifts' && (
-            <KhmerGiftShopView
-              diamonds={diamonds}
-              onSpend={(gift, recipientName) => {
-                setDiamonds((d) => d - gift.price);
-                setGiftHistory((prev) => [
-                  {
-                    id: Date.now(),
-                    giftName: gift.name,
-                    emoji: gift.emoji,
-                    price: gift.price,
-                    isSent: true,
-                    peerName: recipientName,
-                    timestamp: Date.now(),
-                  },
-                  ...prev,
-                ]);
-              }}
-            />
+            <div>
+              <div className="px-4 pt-3 md:hidden">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTab('party')}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-white cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to Party</span>
+                </button>
+              </div>
+              <KhmerGiftShopView
+                diamonds={diamonds}
+                onSpend={(gift, recipientName) => {
+                  setDiamonds((d) => d - gift.price);
+                  setGiftHistory((prev) => [
+                    {
+                      id: Date.now(),
+                      giftName: gift.name,
+                      emoji: gift.emoji,
+                      price: gift.price,
+                      isSent: true,
+                      peerName: recipientName,
+                      timestamp: Date.now(),
+                    },
+                    ...prev,
+                  ]);
+                }}
+              />
+            </div>
           )}
         </div>
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#F5F0FF] grid grid-cols-7 h-16 px-1">
-        {TABS.map((tab) => {
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#1A1921]/98 backdrop-blur-md border-t border-white/10 grid grid-cols-5 h-16 px-2">
+        {MOBILE_TABS.map((tab) => {
           const Icon = tab.icon;
           const active = selectedTab === tab.id;
           return (
@@ -1030,18 +1249,259 @@ export default function App() {
               key={tab.id}
               type="button"
               onClick={() => setSelectedTab(tab.id)}
-              className={`flex flex-col items-center justify-center min-h-[44px] cursor-pointer ${
-                active ? 'text-[#8B5CF6]' : 'text-[#8B8298]'
+              aria-label={tab.label}
+              className={`relative flex flex-col items-center justify-center min-h-[44px] cursor-pointer transition-colors ${
+                active ? 'text-white' : 'text-[#8B8797]'
               }`}
             >
-              <div className={`px-2.5 py-0.5 rounded-full ${active ? 'bg-[#F5F0FF]' : ''}`}>
-                <Icon className="w-5 h-5" />
+              <div className="relative flex items-center justify-center">
+                {tab.id === 'me' ? (
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
+                      active ? 'border-[#8B5CF6]' : 'border-white/25'
+                    }`}
+                    style={{ background: 'linear-gradient(135deg, #DC2626, #9333EA)' }}
+                  >
+                    {displayName.slice(0, 1)}
+                  </div>
+                ) : (
+                  <Icon className={`w-6 h-6 ${active ? 'text-white' : 'text-[#8B8797]'}`} />
+                )}
+                {tab.id === 'party' && (
+                  <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-[#FF4D6D]" />
+                )}
+                {tab.id === 'chat' && unreadChatCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2.5 min-w-[17px] h-[17px] px-1 rounded-full bg-[#FF4D6D] text-white text-[10px] font-bold flex items-center justify-center tabular-nums">
+                    {unreadChatCount}
+                  </span>
+                )}
               </div>
               <span className="text-[10px] font-medium mt-0.5 leading-none">{tab.label}</span>
             </button>
           );
         })}
       </nav>
+
+      {showSoulMatchModal && (
+        <div
+          onClick={() => setShowSoulMatchModal(false)}
+          className="fixed inset-0 z-50 bg-[#0A0712]/75 backdrop-blur-sm flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-3xl bg-[#222128] border border-white/10 p-6 text-center space-y-4 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-extrabold text-white">Soul Game Match ✨</span>
+              <button
+                type="button"
+                onClick={() => setShowSoulMatchModal(false)}
+                aria-label="Close Soul Game"
+                className="w-8 h-8 rounded-full bg-[#2B2A34] text-white/80 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div
+              className="mx-auto w-28 h-28 rounded-full flex items-center justify-center shadow-lg"
+              style={{ background: 'linear-gradient(135deg, #FF5C8A 0%, #8B5CF6 100%)' }}
+            >
+              <Heart className="w-12 h-12 text-white fill-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-extrabold text-white">
+                {soulMatchedPerson ? `Matched with ${soulMatchedPerson} 💜` : 'Ready for a 3-min soul chat?'}
+              </h3>
+              <p className="text-xs text-[#9C97A8] mt-1">
+                23,229 friends online right now waiting to vibe.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setSoulMatchedPerson(SUGGESTED_PEOPLE[Math.floor(Math.random() * SUGGESTED_PEOPLE.length)])
+                }
+                className="w-full min-h-[44px] rounded-full bg-gradient-to-r from-[#FF5C8A] to-[#8B5CF6] text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>{soulMatchedPerson ? 'Find Another Match' : 'Start Soul Match'}</span>
+              </button>
+              {soulMatchedPerson && (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleAddFriend(soulMatchedPerson)}
+                    className="flex-1 min-h-[42px] rounded-full bg-[#2B2A34] text-white text-xs font-bold cursor-pointer"
+                  >
+                    {friends.includes(soulMatchedPerson) ? 'Friends ✓' : '+ Add Friend'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSoulMatchModal(false);
+                      setOpenedChat(soulMatchedPerson);
+                    }}
+                    className="flex-1 min-h-[42px] rounded-full bg-[#8B5CF6] text-white text-xs font-bold cursor-pointer"
+                  >
+                    Say Hi
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStatusModal && (
+        <div
+          onClick={() => setShowStatusModal(false)}
+          className="fixed inset-0 z-50 bg-[#0A0712]/75 flex items-center justify-center p-4"
+        >
+          <form
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const clean = statusDraft.trim();
+              setUserStatusText(clean);
+              if (clean) {
+                setOnlineStatuses((prev) => [
+                  {
+                    id: `st-${Date.now()}`,
+                    name: displayName,
+                    gender: 'male',
+                    age: 22,
+                    status: clean,
+                    region: 'domestic',
+                    avatarBg: 'linear-gradient(135deg, #DC2626, #8B5CF6)',
+                  },
+                  ...prev.filter((p) => p.name !== displayName),
+                ]);
+                setReportToast('Status updated on Home feed!');
+              }
+              setShowStatusModal(false);
+            }}
+            className="w-full max-w-sm rounded-3xl bg-[#222128] border border-white/10 p-5 space-y-3.5 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-extrabold text-white">Update Live Status ✨</h2>
+              <button
+                type="button"
+                onClick={() => setShowStatusModal(false)}
+                className="w-8 h-8 rounded-full bg-[#2B2A34] text-white/80 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <input
+              type="text"
+              value={statusDraft}
+              onChange={(e) => setStatusDraft(e.target.value)}
+              placeholder="What's on your mind right now?"
+              className="w-full min-h-[44px] px-3.5 rounded-xl bg-[#16151B] border border-white/10 text-sm text-white placeholder:text-[#7E798C] focus:outline-none focus:border-[#8B5CF6]"
+            />
+            <div className="flex flex-wrap gap-1.5">
+              {['Listening to music 🎧', 'Looking for friends ✨', 'Coffee time ☕', 'Join my Party! 🎙️'].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setStatusDraft(preset)}
+                  className="px-2.5 py-1 rounded-full bg-[#2B2A34] hover:bg-[#3A3846] text-[11px] text-white/85 cursor-pointer"
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+            <button
+              type="submit"
+              className="w-full min-h-[44px] rounded-full bg-[#8B5CF6] text-white font-bold text-sm cursor-pointer"
+            >
+              Post Status
+            </button>
+          </form>
+        </div>
+      )}
+
+      {showComposeMomentModal && (
+        <div
+          onClick={() => setShowComposeMomentModal(false)}
+          className="fixed inset-0 z-50 bg-[#0A0712]/75 flex items-center justify-center p-4"
+        >
+          <form
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const clean = momentDraft.trim();
+              if (!clean) return;
+              const topic = MOMENT_TOPICS.find((t) => t.id === momentTopicDraft);
+              const created: MomentPost = {
+                id: `m-${Date.now()}`,
+                author: displayName,
+                gender: 'male',
+                age: 22,
+                timeAgo: 'Active now',
+                caption: clean,
+                topicId: momentTopicDraft,
+                imageBg: topic?.gradient,
+                imageEmoji: topic?.emoji,
+                likes: 1,
+                comments: [],
+                shares: 0,
+                tab: 'latest',
+              };
+              setMomentPosts((prev) => [created, ...prev]);
+              setMomentDraft('');
+              setShowComposeMomentModal(false);
+              setSelectedTab('feed');
+              setReportToast('Published your moment!');
+            }}
+            className="w-full max-w-md rounded-3xl bg-[#222128] border border-white/10 p-5 space-y-3.5 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-extrabold text-white">Post a Moment 🪶</h2>
+              <button
+                type="button"
+                onClick={() => setShowComposeMomentModal(false)}
+                className="w-8 h-8 rounded-full bg-[#2B2A34] text-white/80 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <textarea
+              rows={3}
+              value={momentDraft}
+              onChange={(e) => setMomentDraft(e.target.value)}
+              placeholder="Share a story, mood, or festival wish..."
+              className="w-full p-3.5 rounded-xl bg-[#16151B] border border-white/10 text-sm text-white placeholder:text-[#7E798C] focus:outline-none focus:border-[#8B5CF6]"
+            />
+            <div>
+              <div className="text-xs font-bold text-white/75 mb-1.5">Tag a #Topic</div>
+              <div className="flex flex-wrap gap-1.5">
+                {MOMENT_TOPICS.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setMomentTopicDraft(t.id)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer ${
+                      momentTopicDraft === t.id ? 'bg-[#8B5CF6] text-white' : 'bg-[#2B2A34] text-white/80'
+                    }`}
+                  >
+                    #{t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={!momentDraft.trim()}
+              className="w-full min-h-[44px] rounded-full bg-[#8B5CF6] disabled:opacity-50 text-white font-bold text-sm cursor-pointer"
+            >
+              Publish Moment
+            </button>
+          </form>
+        </div>
+      )}
+
       {showAddMusicModal && (
         <AddMusicModal
           onClose={() => setShowAddMusicModal(false)}
@@ -1075,22 +1535,241 @@ export default function App() {
       {reportToast && (
         <div
           role="status"
-          className="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:max-w-md z-50 rounded-2xl bg-[#1A142D] text-white px-4 py-3 shadow-xl border border-white/15 flex items-center justify-between gap-3 text-xs"
+          className="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto md:max-w-md z-50 rounded-2xl bg-[#222128] text-white px-4 py-3 shadow-xl border border-white/15 flex items-center justify-between gap-3 text-xs"
         >
           <div className="flex items-center gap-2 min-w-0">
-            <Flag className="w-4 h-4 text-[#FF7EB6] shrink-0" />
+            <Sparkles className="w-4 h-4 text-[#FF7EB6] shrink-0" />
             <span className="leading-snug">{reportToast}</span>
           </div>
           <button
             type="button"
             onClick={() => setReportToast(null)}
-            aria-label="Dismiss report confirmation"
+            aria-label="Dismiss notification"
             className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center shrink-0 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+function ChatTabView({
+  friends,
+  conversations,
+  claimedFreeDiamonds,
+  onClaimFreeDiamonds,
+  onOpenFriends,
+  onOpenParty,
+  onOpenGifts,
+  onChat,
+}: {
+  friends: string[];
+  conversations: Record<string, ChatMessage[]>;
+  claimedFreeDiamonds: boolean;
+  onClaimFreeDiamonds: () => void;
+  onOpenFriends: () => void;
+  onOpenParty: () => void;
+  onOpenGifts: () => void;
+  onChat: (name: string) => void;
+}) {
+  const richMeta: Record<
+    string,
+    { gender: 'male' | 'female'; age: number; badge?: 'SOULMATE' | 'OFFICIAL'; isParty?: boolean; unread?: number; timeLabel?: string }
+  > = {
+    Mina: { gender: 'female', age: 25, badge: 'SOULMATE', unread: 1, timeLabel: '14:26' },
+    Dara: { gender: 'male', age: 23, timeLabel: 'Sunday' },
+    Sophy: { gender: 'female', age: 24, timeLabel: '12:18' },
+    Alex: { gender: 'male', age: 27, badge: 'SOULMATE', timeLabel: 'Yesterday' },
+    Nita: { gender: 'female', age: 23, isParty: true, unread: 1, timeLabel: 'Wednesday' },
+    Sokha: { gender: 'male', age: 32, isParty: true, timeLabel: 'Monday' },
+  };
+
+  return (
+    <div className="pb-10">
+      <header className="px-4 pt-4 pb-3 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={onOpenFriends}
+          aria-label="Friends directory"
+          className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-white/90 cursor-pointer"
+        >
+          <LayoutGrid className="w-5 h-5" />
+        </button>
+        <div className="text-center min-w-0">
+          <h1 className="text-[19px] font-extrabold text-white leading-tight">Chat</h1>
+          <button
+            type="button"
+            onClick={onOpenFriends}
+            className="text-[11px] text-[#9C97A8] inline-flex items-center gap-0.5 cursor-pointer hover:text-white"
+          >
+            <span>Swipe to meet more friends!</span>
+            <ChevronDown className="w-3 h-3" />
+          </button>
+        </div>
+        <button
+          type="button"
+          onClick={onOpenFriends}
+          aria-label="Add friends"
+          className="w-10 h-10 rounded-full hover:bg-white/10 flex items-center justify-center text-[#FF7EB6] cursor-pointer"
+        >
+          <Bell className="w-5 h-5" />
+        </button>
+      </header>
+
+      <div className="px-4 grid grid-cols-3 gap-2.5">
+        <button
+          type="button"
+          onClick={onOpenFriends}
+          className="rounded-2xl bg-[#222128] border border-white/5 p-3 flex flex-col items-center text-center cursor-pointer hover:bg-[#2A2833] transition-colors"
+        >
+          <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-[#38BDF8] to-[#0EA5E9] flex items-center justify-center text-white font-extrabold text-lg ring-2 ring-[#38BDF8]/40">
+            N
+            <span className="absolute -bottom-1 px-1.5 py-0.2 rounded-full bg-[#FF4D8D] text-[9px] font-bold">
+              ♀ 23
+            </span>
+          </div>
+          <div className="text-[11px] font-bold text-[#FDE68A] mt-2 truncate w-full">🌾 Nita 🌾</div>
+          <div className="text-[10px] text-white/80">Friends Online</div>
+          <div className="inline-flex items-center gap-1 text-[10px] text-[#A78BFA] font-bold mt-1.5">
+            <BarChart2 className="w-3 h-3" />
+            <span>7</span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenGifts}
+          className="rounded-2xl bg-[#222128] border border-white/5 p-3 flex flex-col items-center text-center cursor-pointer hover:bg-[#2A2833] transition-colors"
+        >
+          <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-[#F472B6] to-[#8B5CF6] flex items-center justify-center text-white font-extrabold text-lg ring-2 ring-[#EC4899]/40">
+            S
+            <span className="absolute -bottom-1 px-1.5 py-0.2 rounded-full bg-[#FF4D8D] text-[9px] font-bold">
+              ♀ 23
+            </span>
+          </div>
+          <div className="text-[11px] font-bold text-white/90 mt-2 truncate w-full">Sophy</div>
+          <div className="text-[10px] text-white/80">You Sent Gift</div>
+          <div className="inline-flex items-center gap-1 text-[10px] text-[#A78BFA] font-bold mt-1.5">
+            <BarChart2 className="w-3 h-3" />
+            <span>5</span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={onOpenParty}
+          className="rounded-2xl bg-[#222128] border border-white/5 p-3 flex flex-col items-center text-center cursor-pointer hover:bg-[#2A2833] transition-colors"
+        >
+          <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-[#F59E0B] to-[#B45309] flex items-center justify-center text-white font-extrabold text-lg ring-2 ring-[#F59E0B]/60">
+            K
+            <span className="absolute -bottom-1 px-1.5 py-0.2 rounded-full bg-[#FF4D8D] text-[9px] font-bold">
+              ♀ 18
+            </span>
+          </div>
+          <div className="text-[11px] font-bold text-white/90 mt-2 truncate w-full">Ker Y-Not</div>
+          <div className="text-[10px] text-white/80">Party Followed</div>
+          <div className="inline-flex items-center gap-1 text-[10px] text-[#A78BFA] font-bold mt-1.5">
+            <BarChart2 className="w-3 h-3" />
+            <span>1</span>
+          </div>
+        </button>
+      </div>
+
+      <div className="px-4 mt-3">
+        <button
+          type="button"
+          onClick={onClaimFreeDiamonds}
+          className="w-full rounded-2xl bg-[#222128] hover:bg-[#292832] border border-white/5 p-3 flex items-center gap-3 text-left cursor-pointer transition-colors"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#A855F7] to-[#6366F1] flex items-center justify-center text-xl shrink-0">
+            💎
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-bold text-white flex items-center gap-1.5">
+              <span>Free Diamonds</span>
+              <span>💎</span>
+            </div>
+            <div className="text-xs text-[#9C97A8] truncate">
+              {claimedFreeDiamonds ? 'Claimed +15 diamonds today!' : 'Win random diamonds by watching clips'}
+            </div>
+          </div>
+          {!claimedFreeDiamonds && <span className="w-2.5 h-2.5 rounded-full bg-[#FF4D6D] shrink-0" />}
+        </button>
+      </div>
+
+      <div className="mt-2 divide-y divide-white/5 max-w-2xl">
+        <button
+          type="button"
+          onClick={onOpenGifts}
+          className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-[#222128]/70 cursor-pointer"
+        >
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#38BDF8] to-[#8B5CF6] flex items-center justify-center text-white text-xl shrink-0">
+            💜
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-bold text-white truncate">Happy Place official</span>
+              <CheckCircle2 className="w-4 h-4 text-[#FBBF24] fill-[#FBBF24]/20 shrink-0" />
+            </div>
+            <div className="text-xs text-[#9C97A8] truncate">
+              Congratulations on completing the daily party task!
+            </div>
+          </div>
+          <div className="text-[11px] text-[#7E798C] shrink-0">09:58</div>
+        </button>
+
+        {friends.map((name) => {
+          const preview = conversations[name]?.at(-1)?.text ?? '[Effect: Greetings]';
+          const meta = richMeta[name] ?? { gender: 'female', age: 21, timeLabel: 'Online' };
+          return (
+            <button
+              key={name}
+              type="button"
+              onClick={() => onChat(name)}
+              className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-[#222128]/70 cursor-pointer transition-colors"
+            >
+              <div className="relative shrink-0">
+                <AvatarBadge name={name} />
+                {meta.isParty && (
+                  <span className="absolute -top-1 left-0 right-0 text-center text-[8px] font-extrabold px-1 rounded-full bg-[#7C3AED] text-white">
+                    • PARTY
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-sm font-bold text-white truncate">{name}</span>
+                  <span
+                    className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold text-white ${
+                      meta.gender === 'male' ? 'bg-[#0EA5E9]' : 'bg-[#FF4D8D]'
+                    }`}
+                  >
+                    {meta.gender === 'male' ? '♂' : '♀'} {meta.age}
+                  </span>
+                  {meta.badge === 'SOULMATE' && (
+                    <span className="text-[10px] font-extrabold italic tracking-wide bg-gradient-to-r from-[#FF7EB6] to-[#A78BFA] bg-clip-text text-transparent">
+                      SOULMATE
+                    </span>
+                  )}
+                </div>
+                <div className="text-xs text-[#9C97A8] truncate mt-0.5">{preview}</div>
+              </div>
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <span className="text-[11px] text-[#7E798C] tabular-nums">{meta.timeLabel ?? 'Now'}</span>
+                {meta.unread ? (
+                  <span className="w-5 h-5 rounded-full bg-[#FF4D6D] text-white text-[10px] font-bold flex items-center justify-center tabular-nums">
+                    {meta.unread}
+                  </span>
+                ) : (
+                  <Star className="w-3.5 h-3.5 text-[#7E798C]" />
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -1124,39 +1803,39 @@ function ChatScreen({
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFBFF] flex flex-col">
-      <header className="bg-white border-b border-[#F5F0FF] px-3 py-2.5 flex items-center gap-3 sticky top-0 z-20">
+    <div className="min-h-screen bg-[#16151B] text-white flex flex-col">
+      <header className="bg-[#1C1B22] border-b border-white/10 px-3 py-2.5 flex items-center gap-3 sticky top-0 z-20">
         <button
           type="button"
           onClick={onBack}
           aria-label="Back"
-          className="w-11 h-11 rounded-full flex items-center justify-center text-[#251B3A] hover:bg-[#F5F0FF] cursor-pointer"
+          className="w-11 h-11 rounded-full flex items-center justify-center text-white hover:bg-white/10 cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <AvatarBadge name={name} size="sm" />
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-[#251B3A] text-[17px] truncate">{name}</div>
-          <div className="text-[11px] text-[#8B5CF6] font-medium">Online</div>
+          <div className="font-bold text-white text-[17px] truncate">{name}</div>
+          <div className="text-[11px] text-[#38BDF8] font-medium">Online</div>
         </div>
         <div className="relative">
           <button
             type="button"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Options"
-            className="w-11 h-11 rounded-full flex items-center justify-center text-[#8B8298] hover:bg-[#F5F0FF] cursor-pointer"
+            className="w-11 h-11 rounded-full flex items-center justify-center text-[#9C97A8] hover:bg-white/10 cursor-pointer"
           >
             <MoreVertical className="w-5 h-5" />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-12 w-40 rounded-xl bg-white shadow-lg border border-[#F5F0FF] py-1 z-30">
+            <div className="absolute right-0 top-12 w-40 rounded-xl bg-[#222128] shadow-xl border border-white/10 py-1 z-30">
               <button
                 type="button"
                 onClick={() => {
                   onClearMessages();
                   setMenuOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-[#251B3A] hover:bg-[#F5F0FF] cursor-pointer"
+                className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 cursor-pointer"
               >
                 Clear messages
               </button>
@@ -1166,19 +1845,19 @@ function ChatScreen({
       </header>
 
       <div className="flex-1 max-w-3xl w-full mx-auto px-4 py-3.5 space-y-2.5 overflow-y-auto">
-        <p className="text-center text-xs text-[#8B8298] pb-1.5">Say hello to {name} 👋</p>
+        <p className="text-center text-xs text-[#9C97A8] pb-1.5">Say hello to {name} 👋</p>
         {messages.map((msg) => (
           <div key={msg.id} className={`flex flex-col ${msg.isFromMe ? 'items-end' : 'items-start'}`}>
             <div
               className={`max-w-[280px] sm:max-w-md px-3.5 py-2.5 text-sm ${
                 msg.isFromMe
                   ? 'bg-[#8B5CF6] text-white rounded-[18px] rounded-br-[4px]'
-                  : 'bg-[#F5F0FF] text-[#251B3A] rounded-[18px] rounded-bl-[4px]'
+                  : 'bg-[#222128] text-white border border-white/10 rounded-[18px] rounded-bl-[4px]'
               }`}
             >
               {msg.text}
             </div>
-            <span className="text-[10px] text-[#8B8298] px-1 pt-0.5 tabular-nums">
+            <span className="text-[10px] text-[#7E798C] px-1 pt-0.5 tabular-nums">
               {formatTimestamp(msg.timestamp)}
             </span>
           </div>
@@ -1186,21 +1865,21 @@ function ChatScreen({
         <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white border-t border-[#F5F0FF] px-3 py-2.5 sticky bottom-0">
+      <form onSubmit={handleSubmit} className="bg-[#1C1B22] border-t border-white/10 px-3 py-2.5 sticky bottom-0">
         <div className="max-w-3xl mx-auto flex items-center gap-2">
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 h-11 px-4 rounded-3xl border border-[#8B8298]/40 bg-white text-sm text-[#251B3A] placeholder:text-[#8B8298] focus:outline-none focus:border-[#8B5CF6]"
+            className="flex-1 h-11 px-4 rounded-3xl border border-white/15 bg-[#16151B] text-sm text-white placeholder:text-[#7E798C] focus:outline-none focus:border-[#8B5CF6]"
           />
           <button
             type="submit"
             disabled={!message.trim()}
             aria-label="Send"
             className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-              message.trim() ? 'bg-[#8B5CF6] text-white' : 'bg-[#F5F0FF] text-[#8B8298]'
+              message.trim() ? 'bg-[#8B5CF6] text-white' : 'bg-[#2B2A34] text-[#7E798C]'
             }`}
           >
             <Send className="w-5 h-5" />
@@ -1261,42 +1940,42 @@ function AddMusicModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-[#0A0712]/65 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-[#0A0712]/75 flex items-center justify-center p-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl bg-white p-5 space-y-4 shadow-xl"
+        className="w-full max-w-md rounded-3xl bg-[#222128] border border-white/10 p-5 space-y-4 shadow-xl text-white"
       >
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-extrabold text-[#251B3A]">Add Music 🎶</h2>
-            <p className="text-xs text-[#8B8298]">Upload an audio file or add a song to play in Party</p>
+            <h2 className="text-lg font-extrabold text-white">Add Music 🎶</h2>
+            <p className="text-xs text-[#9C97A8]">Upload an audio file or add a song to play in Party</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close Add Music"
-            className="w-10 h-10 rounded-full bg-[#F5F0FF] text-[#251B3A] flex items-center justify-center cursor-pointer"
+            className="w-10 h-10 rounded-full bg-[#2B2A34] text-white flex items-center justify-center cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <label className="w-full min-h-[52px] rounded-2xl border border-dashed border-[#8B5CF6]/45 bg-[#F5F0FF]/70 hover:bg-[#F5F0FF] px-4 py-3 flex items-center justify-between gap-3 cursor-pointer transition-colors">
+        <label className="w-full min-h-[52px] rounded-2xl border border-dashed border-[#8B5CF6]/55 bg-[#16151B] hover:bg-[#1E1C26] px-4 py-3 flex items-center justify-between gap-3 cursor-pointer transition-colors">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-[#8B5CF6] text-white flex items-center justify-center shrink-0">
               <Upload className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-bold text-[#251B3A] truncate">
+              <div className="text-xs font-bold text-white truncate">
                 {fileName ? fileName : 'Upload audio file (MP3, WAV, M4A)'}
               </div>
-              <div className="text-[11px] text-[#8B8298]">
+              <div className="text-[11px] text-[#9C97A8]">
                 {fileName ? `${formatTrackTime(durationSec)} ready to play` : 'Optional · Plays your real audio file'}
               </div>
             </div>
           </div>
-          <span className="px-3 py-1.5 rounded-xl bg-white text-[#8B5CF6] font-bold text-xs shrink-0">
+          <span className="px-3 py-1.5 rounded-xl bg-[#2B2A34] text-[#A78BFA] font-bold text-xs shrink-0">
             {fileName ? 'Change' : 'Choose'}
           </span>
           <input type="file" accept="audio/*" onChange={handleFileChange} className="hidden" />
@@ -1308,19 +1987,19 @@ function AddMusicModal({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Song title (e.g. Angkor Night Breeze)"
-            className="w-full min-h-[44px] px-3.5 rounded-xl border border-[#8B5CF6]/30 bg-white text-sm text-[#251B3A] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+            className="w-full min-h-[44px] px-3.5 rounded-xl border border-white/15 bg-[#16151B] text-sm text-white placeholder:text-[#7E798C] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
           />
           <input
             type="text"
             value={artist}
             onChange={(e) => setArtist(e.target.value)}
             placeholder="Artist (optional)"
-            className="w-full min-h-[44px] px-3.5 rounded-xl border border-[#8B5CF6]/30 bg-white text-sm text-[#251B3A] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+            className="w-full min-h-[44px] px-3.5 rounded-xl border border-white/15 bg-[#16151B] text-sm text-white placeholder:text-[#7E798C] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
           />
         </div>
 
         <div>
-          <div className="text-xs font-bold text-[#251B3A] mb-2">Music vibe</div>
+          <div className="text-xs font-bold text-white/85 mb-2">Music vibe</div>
           <div className="flex items-center gap-1.5 flex-wrap">
             {ROOM_MOODS.map((m) => {
               const MoodIcon = m.icon;
@@ -1331,7 +2010,7 @@ function AddMusicModal({
                   type="button"
                   onClick={() => setMood(m.id)}
                   className={`min-h-[38px] px-3 rounded-xl flex items-center gap-1.5 text-xs font-bold cursor-pointer transition-colors ${
-                    active ? 'text-white' : 'bg-[#F5F0FF] text-[#251B3A]'
+                    active ? 'text-white' : 'bg-[#2B2A34] text-white/85'
                   }`}
                   style={active ? { backgroundColor: m.color } : undefined}
                 >
@@ -1349,7 +2028,7 @@ function AddMusicModal({
             disabled={!title.trim()}
             onClick={() => submitTrack(false)}
             className={`flex-1 min-h-[44px] rounded-xl font-bold text-xs cursor-pointer ${
-              title.trim() ? 'bg-[#F5F0FF] text-[#8B5CF6] hover:bg-[#EAE0FF]' : 'bg-[#F5F0FF] text-[#8B8298] opacity-60'
+              title.trim() ? 'bg-[#2B2A34] text-[#A78BFA] hover:bg-[#353340]' : 'bg-[#2B2A34] text-[#7E798C] opacity-60'
             }`}
           >
             Add to Library
@@ -1393,29 +2072,29 @@ function ReportRoomModal({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-[#0A0712]/65 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-[#0A0712]/75 flex items-center justify-center p-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md rounded-3xl bg-white p-5 space-y-4 shadow-xl"
+        className="w-full max-w-md rounded-3xl bg-[#222128] border border-white/10 p-5 space-y-4 shadow-xl text-white"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="text-lg font-extrabold text-[#251B3A]">Report Room</h2>
-            <p className="text-xs text-[#8B8298] truncate">Flagging: {room.title}</p>
+            <h2 className="text-lg font-extrabold text-white">Report Room</h2>
+            <p className="text-xs text-[#9C97A8] truncate">Flagging: {room.title}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close Report Room"
-            className="w-10 h-10 rounded-full bg-[#F5F0FF] text-[#251B3A] flex items-center justify-center cursor-pointer shrink-0"
+            className="w-10 h-10 rounded-full bg-[#2B2A34] text-white flex items-center justify-center cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="space-y-2">
-          <div className="text-xs font-bold text-[#251B3A]">Select a reason</div>
+          <div className="text-xs font-bold text-white/85">Select a reason</div>
           <div className="space-y-1.5">
             {REPORT_ROOM_REASONS.map((option) => {
               const active = reason === option;
@@ -1427,7 +2106,7 @@ function ReportRoomModal({
                   className={`w-full min-h-[42px] px-3.5 rounded-xl text-left text-xs font-semibold flex items-center justify-between cursor-pointer transition-colors ${
                     active
                       ? 'bg-[#8B5CF6] text-white'
-                      : 'bg-[#F5F0FF] text-[#251B3A] hover:bg-[#EAE0FF]'
+                      : 'bg-[#2B2A34] text-white/85 hover:bg-[#353340]'
                   }`}
                 >
                   <span>{option}</span>
@@ -1439,7 +2118,7 @@ function ReportRoomModal({
         </div>
 
         <div>
-          <label htmlFor="report-room-details" className="block text-xs font-bold text-[#251B3A] mb-1.5">
+          <label htmlFor="report-room-details" className="block text-xs font-bold text-white/85 mb-1.5">
             Additional details (optional)
           </label>
           <textarea
@@ -1448,7 +2127,7 @@ function ReportRoomModal({
             value={details}
             onChange={(e) => setDetails(e.target.value)}
             placeholder="Share any context that helps our moderation team..."
-            className="w-full p-3 rounded-xl border border-[#8B5CF6]/30 bg-white text-xs text-[#251B3A] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
+            className="w-full p-3 rounded-xl border border-white/15 bg-[#16151B] text-xs text-white placeholder:text-[#7E798C] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]"
           />
         </div>
 
@@ -1456,7 +2135,7 @@ function ReportRoomModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 min-h-[44px] rounded-xl bg-[#F5F0FF] text-[#251B3A] font-bold text-xs cursor-pointer"
+            className="flex-1 min-h-[44px] rounded-xl bg-[#2B2A34] text-white font-bold text-xs cursor-pointer"
           >
             Cancel
           </button>
@@ -1475,310 +2154,238 @@ function ReportRoomModal({
 }
 
 function HomeView({
+  statuses,
   rooms,
-  currentFamily,
-  musicCount,
   friends,
-  friendRequestCount,
-  reportedRoomIds,
+  userStatusText,
   onChat,
   onTab,
-  onJoinRoom,
-  onReportRoom,
-  onOpenFamily,
+  onOpenSoulMatch,
+  onJoinVoiceGame,
   onOpenFriends,
   onAddFriend,
-  onRemoveFriend,
-  onOpenAddMusic,
+  onOpenStatusModal,
 }: {
+  statuses: OnlineStatusPerson[];
   rooms: VoiceRoom[];
-  currentFamily: FamilyClub | null;
-  musicCount: number;
   friends: string[];
-  friendRequestCount: number;
-  reportedRoomIds: string[];
+  userStatusText: string;
   onChat: (name: string) => void;
   onTab: (tab: TabId) => void;
-  onJoinRoom: (room: VoiceRoom) => void;
-  onReportRoom: (room: VoiceRoom) => void;
-  onOpenFamily: () => void;
+  onOpenSoulMatch: () => void;
+  onJoinVoiceGame: () => void;
   onOpenFriends: () => void;
   onAddFriend: (name: string) => void;
-  onRemoveFriend: (name: string) => void;
-  onOpenAddMusic: () => void;
+  onOpenStatusModal: () => void;
 }) {
+  const [regionFilter, setRegionFilter] = useState<'domestic' | 'worldwide'>('domestic');
+  const [genderFilter, setGenderFilter] = useState<'all' | 'female' | 'male'>('all');
   const [notifOpen, setNotifOpen] = useState(false);
 
+  const visibleStatuses = statuses.filter((person) => {
+    const matchesRegion = regionFilter === 'worldwide' ? true : person.region === 'domestic';
+    const matchesGender = genderFilter === 'all' || person.gender === genderFilter;
+    return matchesRegion && matchesGender;
+  });
+
+  const cycleGenderFilter = () => {
+    setGenderFilter((prev) => (prev === 'all' ? 'female' : prev === 'female' ? 'male' : 'all'));
+  };
+
   return (
-    <div className="pb-8">
-      <div className="flex items-center justify-between px-5 py-[18px] relative">
-        <div>
-          <p className="text-[#8B5CF6] text-xs font-bold tracking-[2px]">MY HAPPY PLACE</p>
-          <h1 className="text-[#251B3A] text-[23px] font-extrabold">Find your happy people ✨</h1>
+    <div className="pb-24 min-h-full bg-[#16151B] text-white relative">
+      <div className="flex items-center justify-between px-4 py-3.5 relative">
+        <button
+          type="button"
+          onClick={onOpenFriends}
+          aria-label="Friends & Filters"
+          className="w-10 h-10 rounded-full bg-[#222128] hover:bg-[#2B2A34] flex items-center justify-center text-white/85 cursor-pointer transition-colors"
+        >
+          <SlidersHorizontal className="w-5 h-5" />
+        </button>
+        <div className="text-center">
+          <h1 className="text-white text-[18px] font-extrabold tracking-wide">MY HAPPY PLACE</h1>
         </div>
         <button
           type="button"
           onClick={() => setNotifOpen((p) => !p)}
           aria-label="Notifications"
-          className="w-11 h-11 rounded-full bg-[#F5F0FF] flex items-center justify-center text-[#8B5CF6] cursor-pointer"
+          className="relative w-10 h-10 rounded-full bg-[#222128] hover:bg-[#2B2A34] flex items-center justify-center text-[#FF7EB6] cursor-pointer transition-colors"
         >
           <Bell className="w-5 h-5" />
+          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#FF4D6D]" />
         </button>
         {notifOpen && (
-          <div className="absolute right-5 top-16 z-30 w-64 rounded-2xl bg-white shadow-lg border border-[#F5F0FF] p-3.5 text-xs">
+          <div className="absolute right-4 top-16 z-30 w-64 rounded-2xl bg-[#222128] shadow-xl border border-white/10 p-3.5 text-xs">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-[#251B3A]">Notifications</span>
-              <button type="button" onClick={() => setNotifOpen(false)} className="text-[#8B8298] cursor-pointer">
+              <span className="font-bold text-white">Notifications</span>
+              <button type="button" onClick={() => setNotifOpen(false)} className="text-white/50 hover:text-white cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-[#8B8298]">Welcome to MY HAPPY PLACE 💜</p>
+            <p className="text-white/75">Welcome to MY HAPPY PLACE 💜 {rooms.length} live rooms active now.</p>
           </div>
         )}
       </div>
 
-      <div className="px-[18px] space-y-3">
-        <div
-          className="rounded-[26px] p-5 md:p-7 text-white"
-          style={{ background: 'linear-gradient(135deg, #9C6BFA 0%, #FF8BB8 100%)' }}
-        >
-          <h2 className="text-xl font-bold">A little place for big connections 💜</h2>
-          <p className="text-white/90 text-sm mt-1.5">Meet someone new today.</p>
-          <div className="flex flex-wrap items-center gap-2.5 mt-3.5">
-            <button
-              type="button"
-              onClick={() => onTab('match')}
-              className="px-5 py-2.5 min-h-[44px] rounded-full bg-white text-[#8B5CF6] font-bold text-sm cursor-pointer"
-            >
-              Explore friends
-            </button>
-            <button
-              type="button"
-              onClick={onOpenFriends}
-              className="px-5 py-2.5 min-h-[44px] rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-sm flex items-center gap-1.5 cursor-pointer transition-colors"
-            >
-              <UserPlus className="w-4 h-4" />
-              <span>Add friends</span>
-            </button>
-          </div>
+      <div className="px-4 space-y-3">
+        <div className="grid grid-cols-3 gap-2.5">
+          <button
+            type="button"
+            onClick={onOpenSoulMatch}
+            className="rounded-2xl bg-[#222128] hover:bg-[#2B2A34] border border-white/5 p-3.5 flex flex-col items-center text-center cursor-pointer transition-colors"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-[#FF5C8A]/15 flex items-center justify-center text-[#FF5C8A] mb-2">
+              <MessageCircle className="w-6 h-6 fill-[#FF5C8A]/30" />
+            </div>
+            <div className="text-sm font-bold text-white">Soul game</div>
+            <div className="mt-1 flex items-center gap-1 text-[11px] text-white/60 tabular-nums">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
+              <span>23229 Online</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={onJoinVoiceGame}
+            className="rounded-2xl bg-[#222128] hover:bg-[#2B2A34] border border-white/5 p-3.5 flex flex-col items-center text-center cursor-pointer transition-colors"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-[#10B981]/15 flex items-center justify-center text-[#34D399] mb-2">
+              <Phone className="w-6 h-6" />
+            </div>
+            <div className="text-sm font-bold text-white">Voice game</div>
+            <div className="mt-1 flex items-center gap-1 text-[11px] text-white/60 tabular-nums">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
+              <span>20042 Online</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onTab('party')}
+            className="rounded-2xl bg-[#222128] hover:bg-[#2B2A34] border border-white/5 p-3.5 flex flex-col items-center text-center cursor-pointer transition-colors"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-[#8B5CF6]/20 flex items-center justify-center text-[#A78BFA] mb-2">
+              <Mic className="w-6 h-6" />
+            </div>
+            <div className="text-sm font-bold text-white">Party Match</div>
+            <div className="mt-1 flex items-center gap-1 text-[11px] text-white/60 tabular-nums">
+              <BarChart2 className="w-3 h-3 text-[#FF5C8A]" />
+              <span>9291 Playing</span>
+            </div>
+          </button>
         </div>
 
-        <button
-          type="button"
-          onClick={onOpenFriends}
-          className="w-full rounded-[20px] bg-[#F5F0FF] hover:bg-[#EAE0FF] transition-colors p-4 flex items-center gap-3 text-left cursor-pointer"
-        >
+        <div className="rounded-2xl bg-[#222128] border border-white/5 px-3.5 py-3 flex items-center gap-3">
           <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0"
-            style={{ background: 'linear-gradient(135deg, #FF7EB6 0%, #8B5CF6 100%)' }}
+            className="w-12 h-12 rounded-full shrink-0 flex items-center justify-center shadow-inner"
+            style={{ background: 'radial-gradient(circle at 30% 30%, #A78BFA 0%, #6D28D9 65%, #1E1B4B 100%)' }}
           >
-            <UserPlus className="w-6 h-6" />
+            <Globe className="w-6 h-6 text-white" />
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-extrabold text-[#251B3A] text-[15px] truncate">Friends &amp; Requests</div>
-            <div className="text-xs text-[#8B8298] truncate tabular-nums">
-              {friends.length} friends
-              {friendRequestCount > 0 ? ` · ${friendRequestCount} pending requests` : ' · Find people by name or handle'}
-            </div>
-          </div>
-          <span className="px-3.5 py-2 rounded-full bg-[#8B5CF6] text-white font-bold text-xs whitespace-nowrap shrink-0 flex items-center gap-1">
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Add friends</span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenFamily}
-          className="w-full rounded-[20px] bg-[#F5F0FF] hover:bg-[#EAE0FF] transition-colors p-4 flex items-center gap-3 text-left cursor-pointer"
-        >
-          <FamilyLogoBadge
-            emblem={currentFamily?.emblem ?? '🏠'}
-            color={currentFamily?.color ?? '#8B5CF6'}
-            accentColor={currentFamily?.accentColor ?? '#FF7EB6'}
-            shape={currentFamily?.logoShape ?? 'circle'}
-            logoImage={currentFamily?.logoImage}
-            size="md"
-          />
-          <div className="flex-1 min-w-0">
-            <div className="font-extrabold text-[#251B3A] text-[15px] truncate">
-              {currentFamily ? currentFamily.name : 'Join a Family'}
-            </div>
-            <div className="text-xs text-[#8B8298] truncate tabular-nums">
-              {currentFamily
-                ? `Level ${currentFamily.level} · ${currentFamily.members.length} members · ${currentFamily.points} pts`
-                : 'Find your community or create your own crew'}
-            </div>
-          </div>
-          <span className="px-3.5 py-2 rounded-full bg-[#8B5CF6] text-white font-bold text-xs whitespace-nowrap shrink-0">
-            Family
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={onOpenAddMusic}
-          className="w-full rounded-[20px] bg-[#F5F0FF] hover:bg-[#EAE0FF] transition-colors p-4 flex items-center gap-3 text-left cursor-pointer"
-        >
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shrink-0"
-            style={{ background: 'linear-gradient(135deg, #5B6EE1 0%, #8B5CF6 100%)' }}
+          <button
+            type="button"
+            onClick={() => setRegionFilter((r) => (r === 'domestic' ? 'worldwide' : 'domestic'))}
+            className="flex-1 min-w-0 text-left cursor-pointer"
           >
-            <Music className="w-6 h-6" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="font-extrabold text-[#251B3A] text-[15px] truncate">Party Music Library</div>
-            <div className="text-xs text-[#8B8298] truncate tabular-nums">
-              {musicCount} songs ready · Upload audio or add tracks
+            <div className="flex items-center gap-1 text-sm font-extrabold text-white">
+              <span>Worldwide Match</span>
+              <ChevronRight className="w-4 h-4 text-white/50" />
             </div>
-          </div>
-          <span className="px-3.5 py-2 rounded-full bg-[#5B6EE1] text-white font-bold text-xs whitespace-nowrap shrink-0 flex items-center gap-1">
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add music</span>
-          </span>
-        </button>
-      </div>
+            <div className="text-[11px] text-white/55 truncate">Meet worldwide Friends online</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setRegionFilter((r) => (r === 'domestic' ? 'worldwide' : 'domestic'))}
+            className="px-3 py-1.5 rounded-full bg-[#3A2D54] hover:bg-[#4B396E] text-[#E9D5FF] text-xs font-bold whitespace-nowrap cursor-pointer transition-colors"
+          >
+            {regionFilter === 'domestic' ? 'Domestic ⇄' : 'Worldwide ⇄'}
+          </button>
+          <button
+            type="button"
+            onClick={cycleGenderFilter}
+            aria-label="Filter by gender"
+            className="px-2.5 py-1.5 rounded-full bg-[#2B2A34] hover:bg-[#363442] text-[#A78BFA] text-xs font-bold whitespace-nowrap cursor-pointer transition-colors"
+          >
+            {genderFilter === 'all' ? 'All' : genderFilter === 'female' ? '♀' : '♂'}
+          </button>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-2">
-        <section className="lg:col-span-7">
-          <div className="flex items-center justify-between px-5 pt-6 pb-2">
-            <h2 className="font-bold text-[#251B3A] text-[17px]">People you may like</h2>
-            <button type="button" onClick={onOpenFriends} className="text-[#8B5CF6] font-semibold text-xs cursor-pointer">
-              See all
+        {userStatusText && (
+          <div className="rounded-2xl bg-[#222128] border border-[#8B5CF6]/25 px-3.5 py-2.5 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[#A78BFA]">Your live status</div>
+              <div className="text-xs text-white/90 truncate">{userStatusText}</div>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenStatusModal}
+              className="text-xs font-bold text-[#A78BFA] hover:text-white px-2.5 py-1 rounded-full bg-[#2B2A34] cursor-pointer shrink-0"
+            >
+              Edit
             </button>
           </div>
-          {SUGGESTED_PEOPLE.map((name) => {
-            const isFriend = friends.includes(name);
+        )}
+
+        <div className="space-y-1 pt-1">
+          {visibleStatuses.map((person) => {
+            const isFriend = friends.includes(person.name);
             return (
               <div
-                key={name}
-                className="w-full flex items-center gap-3 px-5 py-2 hover:bg-[#F5F0FF]/70 rounded-xl"
+                key={person.id}
+                className="flex items-center gap-3 px-2 py-2.5 rounded-2xl hover:bg-[#222128]/90 transition-colors"
               >
                 <button
                   type="button"
-                  onClick={() => onChat(name)}
-                  className="flex-1 min-w-0 flex items-center gap-3 text-left cursor-pointer py-0.5"
+                  onClick={() => onChat(person.name)}
+                  className="flex-1 min-w-0 flex items-center gap-3 text-left cursor-pointer"
                 >
-                  <AvatarBadge name={name} />
+                  <div className="relative shrink-0">
+                    <AvatarBadge name={person.name} size="md" />
+                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#38BDF8] ring-2 ring-[#16151B]" />
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[#251B3A] font-bold text-[15px] truncate">{name}</div>
-                    <div className="text-[#8B8298] text-xs truncate">
-                      {isFriend ? 'Friend · Online' : 'Online · Say hello'}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-bold text-white truncate">{person.name}</span>
+                      <span
+                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          person.gender === 'female'
+                            ? 'bg-[#FF5C8A]/20 text-[#FF85A6]'
+                            : 'bg-[#38BDF8]/20 text-[#60A5FA]'
+                        }`}
+                      >
+                        {person.gender === 'female' ? '♀' : '♂'} {person.age}
+                      </span>
                     </div>
+                    <div className="text-xs text-white/60 truncate mt-0.5">{person.status}</div>
                   </div>
                 </button>
                 <button
                   type="button"
-                  onClick={() => (isFriend ? onRemoveFriend(name) : onAddFriend(name))}
-                  className={`min-h-[38px] px-3 rounded-full text-xs font-bold inline-flex items-center gap-1.5 whitespace-nowrap cursor-pointer transition-colors shrink-0 ${
+                  onClick={() => (isFriend ? onChat(person.name) : onAddFriend(person.name))}
+                  className={`min-h-[36px] px-3 rounded-full text-xs font-bold inline-flex items-center gap-1 whitespace-nowrap cursor-pointer shrink-0 transition-colors ${
                     isFriend
-                      ? 'bg-[#F5F0FF] text-[#8B5CF6] hover:bg-[#EAE0FF]'
-                      : 'bg-[#8B5CF6] text-white hover:bg-[#7C4DFF]'
+                      ? 'bg-[#2B2A34] text-white/80 hover:bg-[#383645]'
+                      : 'bg-[#8B5CF6]/20 hover:bg-[#8B5CF6] text-[#C4B5FD] hover:text-white'
                   }`}
                 >
                   {isFriend ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
-                  <span>{isFriend ? 'Friends' : 'Add friend'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onChat(name)}
-                  aria-label={`Message ${name}`}
-                  className="min-h-[38px] min-w-[38px] rounded-full flex items-center justify-center text-[#8B5CF6] hover:bg-[#F5F0FF] cursor-pointer shrink-0"
-                >
-                  <MessageCircle className="w-5 h-5" />
+                  <span>{isFriend ? 'Chat' : 'Add'}</span>
                 </button>
               </div>
             );
           })}
-        </section>
-
-        <section className="lg:col-span-5">
-          <div className="flex items-center justify-between px-5 pt-6 pb-2">
-            <h2 className="font-bold text-[#251B3A] text-[17px]">Popular rooms</h2>
-            <button type="button" onClick={() => onTab('party')} className="text-[#8B5CF6] text-xs cursor-pointer">
-              View all
-            </button>
-          </div>
-          <div className="px-5 space-y-3">
-            {rooms.map((room) => (
-              <VoiceRoomCard
-                key={room.id}
-                room={room}
-                isReported={reportedRoomIds.includes(room.id)}
-                onClick={() => onJoinRoom(room)}
-                onReport={() => onReportRoom(room)}
-              />
-            ))}
-          </div>
-        </section>
-      </div>
-    </div>
-  );
-}
-
-function MatchView({
-  friends,
-  onAddFriend,
-  onChat,
-}: {
-  friends: string[];
-  onAddFriend: (name: string) => void;
-  onChat: (name: string) => void;
-}) {
-  const [matched, setMatched] = useState<string | null>(null);
-  const isFriend = matched ? friends.includes(matched) : false;
-  return (
-    <div className="min-h-full bg-[#F5F0FF] flex flex-col">
-      <div className="px-5 py-4">
-        <h1 className="text-[27px] font-extrabold text-[#251B3A]">Soul Match</h1>
-        <p className="text-[13px] text-[#8B8298]">A new friend could be one tap away</p>
-      </div>
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 text-center">
-        <div
-          className="w-[190px] h-[190px] rounded-full flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #FF7EB6 0%, #8B5CF6 100%)' }}
-        >
-          <Heart className="w-[82px] h-[82px] text-white fill-white" />
-        </div>
-        <h2 className="text-[#251B3A] font-bold text-xl mt-6">
-          {matched ? `Matched with ${matched} 💜` : 'Ready to meet someone?'}
-        </h2>
-        <p className="text-[#8B8298] text-[13px] mt-1">
-          Find a person to share a little moment with.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
-          <button
-            type="button"
-            onClick={() => setMatched(SUGGESTED_PEOPLE[Math.floor(Math.random() * SUGGESTED_PEOPLE.length)])}
-            className="min-h-[48px] px-7 rounded-3xl bg-[#8B5CF6] text-white font-bold text-sm flex items-center gap-2 cursor-pointer"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>Start matching</span>
-          </button>
-          {matched && (
-            <>
-              <button
-                type="button"
-                onClick={() => onAddFriend(matched)}
-                disabled={isFriend}
-                className={`min-h-[48px] px-5 rounded-3xl font-bold text-sm flex items-center gap-1.5 cursor-pointer ${
-                  isFriend ? 'bg-white/70 text-[#8B5CF6]' : 'bg-white text-[#251B3A] hover:bg-[#EAE0FF]'
-                }`}
-              >
-                {isFriend ? <UserCheck className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-                <span>{isFriend ? 'Friends' : 'Add friend'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onChat(matched)}
-                className="min-h-[48px] px-5 rounded-3xl bg-white text-[#8B5CF6] font-bold text-sm cursor-pointer"
-              >
-                Chat
-              </button>
-            </>
-          )}
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={onOpenStatusModal}
+        className="fixed bottom-24 right-5 md:bottom-8 md:right-8 z-30 min-h-[44px] px-4 rounded-full bg-[#2B2A34] hover:bg-[#3A3846] border border-white/10 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg cursor-pointer transition-colors"
+      >
+        <Plus className="w-4 h-4" />
+        <span>Status</span>
+      </button>
     </div>
   );
 }
@@ -1799,62 +2406,65 @@ function VoiceRoomCard({
   const isActive = room.isActive ?? room.listeners > 0;
   const gradientStart = room.color || mood.gradientFrom;
   const owner = room.owner ?? room.speakers[0] ?? 'Host';
+
   return (
     <div
-      className="VoiceRoomCard group/card w-full rounded-[18px] p-4 flex items-center gap-3 transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.015] hover:shadow-md active:scale-[0.985] motion-reduce:transform-none motion-reduce:transition-none"
+      className="VoiceRoomCard group/card w-full rounded-[18px] p-3.5 flex items-center gap-3 border border-white/10 transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.01] hover:border-white/20 active:scale-[0.99] motion-reduce:transform-none motion-reduce:transition-none"
       style={{
-        backgroundColor: gradientStart,
-        backgroundImage: `linear-gradient(135deg, ${gradientStart} 0%, ${mood.gradientTo} 100%)`,
+        backgroundColor: '#222128',
+        backgroundImage: `linear-gradient(135deg, ${gradientStart}30 0%, #222128 70%)`,
       }}
     >
       <button
         type="button"
         onClick={onClick}
-        className="flex-1 min-w-0 flex items-center gap-3 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-xl"
+        className="flex-1 min-w-0 flex items-center gap-3 text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] rounded-xl"
       >
-        <div className="relative w-11 h-11 flex items-center justify-center shrink-0">
-          <Headphones className="w-8 h-8 text-white" />
+        <div className="relative shrink-0">
+          <AvatarBadge name={owner} size="lg" />
           <span
             role="img"
             aria-label={`${mood.label} mood: ${mood.description}`}
-            className="group/mood absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow-sm"
+            className="group/mood absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#16151B] border border-white/15 flex items-center justify-center shadow-sm"
           >
-            <MoodIcon className="w-3 h-3" style={{ color: gradientStart }} />
+            <MoodIcon className="w-3.5 h-3.5" style={{ color: gradientStart }} />
             <span
               role="tooltip"
-              className="pointer-events-none absolute left-0 bottom-full mb-2 z-30 w-max max-w-[210px] rounded-lg bg-[#1A142D] px-2.5 py-1.5 text-left text-[11px] leading-snug text-white shadow-lg ring-1 ring-white/15 opacity-0 translate-y-1 transition-[opacity,transform] duration-150 ease-out group-hover/mood:opacity-100 group-hover/mood:translate-y-0 group-focus-visible/card:opacity-100 group-focus-visible/card:translate-y-0 motion-reduce:transition-none"
+              className="pointer-events-none absolute left-0 bottom-full mb-2 z-30 w-max max-w-[210px] rounded-lg bg-[#16151B] px-2.5 py-1.5 text-left text-[11px] leading-snug text-white shadow-lg ring-1 ring-white/15 opacity-0 translate-y-1 transition-[opacity,transform] duration-150 ease-out group-hover/mood:opacity-100 group-hover/mood:translate-y-0 motion-reduce:transition-none"
             >
               <span className="font-bold">{mood.label}</span>
               <span className="text-white/80"> — {mood.description}</span>
             </span>
           </span>
         </div>
+
         <div className="flex-1 min-w-0 space-y-1">
           <div className="text-white font-bold text-[15px] truncate">{room.title}</div>
-          <div className="text-white/85 text-[11px] truncate tabular-nums">
-            {room.detail} · {mood.label}
-          </div>
           <div className="flex items-center gap-1.5 min-w-0">
             <AvatarBadge name={owner} size="xs" />
-            <span className="text-white/95 text-xs font-semibold truncate">{owner}</span>
+            <span className="text-white/80 text-xs font-semibold truncate">{owner}</span>
+            <span className="text-white/40 text-[11px]">·</span>
+            <span className="text-white/60 text-[11px] truncate">{mood.label}</span>
           </div>
+          <div className="text-white/50 text-[11px] truncate tabular-nums">{room.detail}</div>
         </div>
       </button>
+
       <div className="flex flex-col items-end gap-1.5 shrink-0">
         <div className="flex items-center gap-1.5">
           <span
             aria-label={`${room.listeners} live users`}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/20 text-white text-xs font-bold tabular-nums whitespace-nowrap ${
-              isActive ? 'live-user-badge--active' : 'opacity-75'
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/30 text-[#C4B5FD] text-xs font-bold tabular-nums whitespace-nowrap ${
+              isActive ? 'live-user-badge--active' : 'opacity-70'
             }`}
           >
-            <Users className="w-3.5 h-3.5 shrink-0" />
+            <BarChart2 className="w-3.5 h-3.5 text-[#8B5CF6] shrink-0" />
             <span>{room.listeners}</span>
           </span>
           <button
             type="button"
             onClick={onClick}
-            className="text-white font-bold text-xs px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 whitespace-nowrap cursor-pointer transition-colors"
+            className="text-white font-bold text-xs px-3 py-1 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] whitespace-nowrap cursor-pointer transition-colors"
           >
             JOIN
           </button>
@@ -1863,10 +2473,10 @@ function VoiceRoomCard({
           type="button"
           onClick={onReport}
           aria-label={`Report Room: ${room.title}`}
-          className={`min-h-[28px] px-2.5 py-0.5 rounded-full text-[11px] font-semibold inline-flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+          className={`min-h-[28px] px-2.5 py-0.5 rounded-full text-[11px] font-semibold inline-flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5C8A] ${
             isReported
               ? 'bg-[#FF5C8A] text-white'
-              : 'bg-black/20 hover:bg-[#FF5C8A] text-white/95 hover:text-white'
+              : 'bg-white/10 hover:bg-[#FF5C8A] text-white/75 hover:text-white'
           }`}
         >
           <Flag className="w-3 h-3 shrink-0" />
@@ -1905,32 +2515,32 @@ function EmptyVoiceRoomPlaceholder({
 
   return (
     <div
-      className="mx-5 rounded-[22px] border border-[#8B5CF6]/20 bg-gradient-to-br from-[#F5F0FF] via-white to-[#FFF0F6] p-6 sm:p-7 text-center max-w-lg shadow-sm"
+      className="mx-4 rounded-[22px] border border-white/10 bg-[#222128] p-6 sm:p-7 text-center max-w-lg shadow-sm"
       role="status"
       aria-live="polite"
     >
       <div
         className="mx-auto w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm mb-3"
-        style={{ backgroundColor: `${accentColor}1A`, color: accentColor }}
+        style={{ backgroundColor: `${accentColor}26`, color: accentColor }}
       >
         <MoodIcon className="w-6 h-6" />
       </div>
-      <h2 className="text-[#251B3A] font-extrabold text-base">No rooms found for this mood</h2>
-      <p className="text-xs text-[#6E657D] mt-1.5 leading-relaxed max-w-sm mx-auto">{description}</p>
+      <h2 className="text-white font-extrabold text-base">No rooms found for this mood</h2>
+      <p className="text-xs text-white/60 mt-1.5 leading-relaxed max-w-sm mx-auto">{description}</p>
       <div className="flex flex-wrap items-center justify-center gap-2.5 mt-4">
         <button
           type="button"
           onClick={onResetAll}
-          className="min-h-[44px] px-6 rounded-full bg-[#8B5CF6] hover:bg-[#7C4DFF] text-white font-bold text-xs cursor-pointer transition-colors whitespace-nowrap shadow-sm"
+          className="min-h-[44px] px-6 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-bold text-xs cursor-pointer transition-colors whitespace-nowrap"
         >
           All
         </button>
         <button
           type="button"
           onClick={onCreateRoom}
-          className="min-h-[44px] px-5 rounded-full bg-white hover:bg-[#F5F0FF] text-[#251B3A] border border-[#8B5CF6]/25 font-bold text-xs cursor-pointer transition-colors whitespace-nowrap"
+          className="min-h-[44px] px-5 rounded-full bg-[#2B2A34] hover:bg-[#363442] text-white border border-white/10 font-bold text-xs cursor-pointer transition-colors whitespace-nowrap"
         >
-          Create room
+          Create Party
         </button>
       </div>
     </div>
@@ -1944,6 +2554,8 @@ function PartyView({
   onJoinRoom,
   onReportRoom,
   onOpenAddMusic,
+  onOpenFamily,
+  onOpenShop,
   onCreateRoom,
 }: {
   rooms: VoiceRoom[];
@@ -1952,15 +2564,40 @@ function PartyView({
   onJoinRoom: (room: VoiceRoom) => void;
   onReportRoom: (room: VoiceRoom) => void;
   onOpenAddMusic: () => void;
-  onCreateRoom: (title: string, mood: RoomMoodId, backgroundId: PartyBackgroundId) => void;
+  onOpenFamily: () => void;
+  onOpenShop: () => void;
+  onCreateRoom: (payload: {
+    title: string;
+    mood: RoomMoodId;
+    backgroundId: PartyBackgroundId;
+    partyMode: 'Free Mic' | 'Music Lounge' | 'Karaoke' | 'Truth or Dare';
+    welcomeMessage: string;
+    isLocked: boolean;
+  }) => void;
 }) {
   const [title, setTitle] = useState('');
   const [selectedMood, setSelectedMood] = useState<RoomMoodId>('happy');
   const [selectedBg, setSelectedBg] = useState<PartyBackgroundId>('lounge');
+  const [selectedPartyMode, setSelectedPartyMode] = useState<'Free Mic' | 'Music Lounge' | 'Karaoke' | 'Truth or Dare'>('Free Mic');
+  const [welcomeMessage, setWelcomeMessage] = useState('');
+  const [isLocked, setIsLocked] = useState(false);
   const [moodFilter, setMoodFilter] = useState<RoomMoodId | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'popular' | 'newest'>('popular');
+  const [activeSubTab, setActiveSubTab] = useState<'following' | 'foru' | 'hot' | 'new' | 'recent'>('recent');
   const [creating, setCreating] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const activeCreateMood = getRoomMood(selectedMood);
+  const ActiveCreateMoodIcon = activeCreateMood.icon;
+  const activeCreateBg = PARTY_BACKGROUNDS.find((b) => b.id === selectedBg) ?? PARTY_BACKGROUNDS[0];
+  const createTitleSuggestions = ['Chill & Chat ☕', 'Khmer Music Night 🎶', 'Late Night Karaoke 🎤', 'Truth or Dare 🎲'];
+  const createPartyModes: ('Free Mic' | 'Music Lounge' | 'Karaoke' | 'Truth or Dare')[] = [
+    'Free Mic',
+    'Music Lounge',
+    'Karaoke',
+    'Truth or Dare',
+  ];
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const visibleRooms = rooms
@@ -1979,50 +2616,152 @@ function PartyView({
       return b.listeners - a.listeners || (b.createdAt ?? 0) - (a.createdAt ?? 0);
     });
 
-  const activeMoodTheme = moodFilter === 'all' ? null : getRoomMood(moodFilter);
-  const lobbyBackdrop = activeMoodTheme
-    ? `linear-gradient(180deg, ${activeMoodTheme.gradientFrom}18 0%, ${activeMoodTheme.gradientTo}0D 38%, rgba(255,251,255,0) 78%)`
-    : 'linear-gradient(180deg, rgba(139,92,246,0.10) 0%, rgba(255,126,182,0.06) 36%, rgba(255,251,255,0) 75%)';
+  const handleJoinRandom = () => {
+    const pool = visibleRooms.length > 0 ? visibleRooms : rooms;
+    if (pool.length === 0) return;
+    const picked = pool[Math.floor(Math.random() * pool.length)];
+    onJoinRoom(picked);
+  };
 
   return (
-    <div className="pb-8 min-h-full transition-[background] duration-300" style={{ backgroundImage: lobbyBackdrop }}>
-      <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-3">
+    <div className="pb-28 min-h-full bg-[#16151B] text-white relative">
+      <div className="px-4 pt-4 pb-3 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-[27px] font-extrabold text-[#251B3A]">Voice Party 🎙️</h1>
-          <p className="text-[13px] text-[#8B8298]">
-            Join a room and make new friends · {musicLibrary.length} party tracks ready
-          </p>
+          <h1 className="text-[22px] font-extrabold text-white">Party Chat</h1>
+          <p className="text-[11px] text-white/55 tabular-nums">{musicLibrary.length} party tracks ready</p>
         </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenAddMusic}
+            aria-label="Open music library"
+            className="relative w-10 h-10 rounded-xl bg-[#222128] hover:bg-[#2B2A34] flex items-center justify-center text-[#A78BFA] cursor-pointer transition-colors"
+          >
+            <Music className="w-5 h-5" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FF4D6D]" />
+          </button>
+          <button
+            type="button"
+            onClick={() => searchInputRef.current?.focus()}
+            aria-label="Focus room search"
+            className="w-10 h-10 rounded-xl bg-[#222128] hover:bg-[#2B2A34] flex items-center justify-center text-white/85 cursor-pointer transition-colors"
+          >
+            <Search className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* 2026 Annual Points Banner */}
+      <div className="px-4 mb-3">
+        <div
+          className="rounded-2xl p-4 relative overflow-hidden border border-[#FBBF24]/25"
+          style={{ background: 'linear-gradient(135deg, #4C1D95 0%, #831843 55%, #B45309 100%)' }}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-black/30 text-[#FDE68A] text-[10px] font-bold mb-1">
+                <Trophy className="w-3 h-3" />
+                <span>2026 Annual Points</span>
+              </div>
+              <div className="text-sm font-extrabold text-white">Complete tasks &amp; earn Deluxe Lucky rewards</div>
+              <p className="text-[11px] text-white/80 mt-0.5">Collect room heat points with friends in MY HAPPY PLACE</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleJoinRandom}
+              className="px-3.5 py-2 rounded-full bg-[#FBBF24] text-[#251B3A] font-extrabold text-xs whitespace-nowrap cursor-pointer shrink-0"
+            >
+              Join Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Ranking / Family / Shop Shortcuts */}
+      <div className="px-4 mb-4 grid grid-cols-3 gap-2.5">
         <button
           type="button"
-          onClick={onOpenAddMusic}
-          className="min-h-[44px] px-4 rounded-full bg-[#5B6EE1] text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
+          onClick={() => {
+            setSortBy('popular');
+            setActiveSubTab('hot');
+          }}
+          className="rounded-2xl bg-[#222128] hover:bg-[#2B2A34] py-2.5 px-2 flex flex-col items-center gap-1 cursor-pointer transition-colors"
         >
-          <Music className="w-4 h-4" />
-          <span>Add music</span>
+          <Trophy className="w-5 h-5 text-[#FBBF24]" />
+          <span className="text-xs font-semibold text-white/85">Ranking</span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenFamily}
+          className="rounded-2xl bg-[#222128] hover:bg-[#2B2A34] py-2.5 px-2 flex flex-col items-center gap-1 cursor-pointer transition-colors"
+        >
+          <Shield className="w-5 h-5 text-[#8B5CF6]" />
+          <span className="text-xs font-semibold text-white/85">Family</span>
+        </button>
+        <button
+          type="button"
+          onClick={onOpenShop}
+          className="rounded-2xl bg-[#222128] hover:bg-[#2B2A34] py-2.5 px-2 flex flex-col items-center gap-1 cursor-pointer transition-colors"
+        >
+          <ShoppingBag className="w-5 h-5 text-[#FF5C8A]" />
+          <span className="text-xs font-semibold text-white/85">Shop</span>
         </button>
       </div>
 
-      <div className="px-5 pb-3 flex flex-wrap items-center gap-2.5 max-w-2xl">
-        <div className="relative flex items-center flex-1 min-w-[210px]">
+      {/* Category Sub-tabs */}
+      <div className="px-4 pb-3 flex items-center gap-5 overflow-x-auto border-b border-white/5 mb-3">
+        {(
+          [
+            { id: 'following', label: 'Following' },
+            { id: 'foru', label: 'For U' },
+            { id: 'hot', label: 'Hot' },
+            { id: 'new', label: 'New' },
+            { id: 'recent', label: 'Recent' },
+          ] as const
+        ).map((sub) => {
+          const active = activeSubTab === sub.id;
+          return (
+            <button
+              key={sub.id}
+              type="button"
+              onClick={() => {
+                setActiveSubTab(sub.id);
+                if (sub.id === 'new') setSortBy('newest');
+                else if (sub.id === 'hot') setSortBy('popular');
+              }}
+              className={`pb-2 text-sm font-bold whitespace-nowrap relative cursor-pointer transition-colors ${
+                active ? 'text-white' : 'text-white/45 hover:text-white/80'
+              }`}
+            >
+              {sub.label}
+              {active && <span className="absolute left-1/2 -translate-x-1/2 bottom-0 w-5 h-0.5 rounded-full bg-[#8B5CF6]" />}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Search & Sort Controls */}
+      <div className="px-4 pb-3 flex flex-wrap items-center gap-2.5 max-w-2xl">
+        <div className="relative flex items-center flex-1 min-w-[200px]">
           <label htmlFor="party-room-search" className="sr-only">
             Search rooms by title or owner name
           </label>
-          <Search className="w-4 h-4 text-[#8B5CF6] absolute left-3.5 pointer-events-none" />
+          <Search className="w-4 h-4 text-[#A78BFA] absolute left-3.5 pointer-events-none" />
           <input
+            ref={searchInputRef}
             id="party-room-search"
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search rooms by title or host name..."
-            className="w-full min-h-[44px] pl-10 pr-11 rounded-2xl bg-[#F5F0FF]/80 border border-[#8B5CF6]/20 text-sm text-[#251B3A] placeholder:text-[#8B8298] focus:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] transition-colors"
+            className="w-full min-h-[42px] pl-10 pr-10 rounded-2xl bg-[#222128] border border-white/10 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] transition-colors"
           />
           {searchQuery.length > 0 && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
               aria-label="Clear room search"
-              className="absolute right-1.5 min-h-[36px] min-w-[36px] rounded-full flex items-center justify-center text-[#8B8298] hover:text-[#251B3A] hover:bg-[#8B5CF6]/10 cursor-pointer transition-colors"
+              className="absolute right-1.5 min-h-[34px] min-w-[34px] rounded-full flex items-center justify-center text-white/50 hover:text-white cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -2032,13 +2771,13 @@ function PartyView({
           <label htmlFor="party-room-sort" className="sr-only">
             Sort voice rooms
           </label>
-          <ArrowUpDown className="w-3.5 h-3.5 text-[#8B5CF6] absolute left-3 pointer-events-none" />
+          <ArrowUpDown className="w-3.5 h-3.5 text-[#A78BFA] absolute left-3 pointer-events-none" />
           <select
             id="party-room-sort"
             aria-label="Sort voice rooms"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'popular' | 'newest')}
-            className="min-h-[44px] pl-8 pr-4 rounded-2xl bg-[#F5F0FF]/80 border border-[#8B5CF6]/20 text-xs font-bold text-[#251B3A] focus:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] cursor-pointer transition-colors"
+            className="min-h-[42px] pl-8 pr-4 rounded-2xl bg-[#222128] border border-white/10 text-xs font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6] cursor-pointer"
           >
             <option value="popular">Most Popular</option>
             <option value="newest">Newest</option>
@@ -2046,14 +2785,13 @@ function PartyView({
         </div>
       </div>
 
-      <div className="px-5 pb-4 flex items-center gap-2 overflow-x-auto">
+      {/* Mood Filter Pills */}
+      <div className="px-4 pb-4 flex items-center gap-2 overflow-x-auto">
         <button
           type="button"
           onClick={() => setMoodFilter('all')}
-          className={`min-h-[44px] px-4 rounded-full text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
-            moodFilter === 'all'
-              ? 'bg-[#8B5CF6] text-white'
-              : 'bg-[#F5F0FF] text-[#251B3A] hover:bg-[#EAE0FF]'
+          className={`min-h-[38px] px-4 rounded-full text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
+            moodFilter === 'all' ? 'bg-[#8B5CF6] text-white' : 'bg-[#222128] text-white/75 hover:bg-[#2B2A34]'
           }`}
         >
           All
@@ -2066,12 +2804,12 @@ function PartyView({
               key={mood.id}
               type="button"
               onClick={() => setMoodFilter(active ? 'all' : mood.id)}
-              className={`min-h-[44px] px-4 rounded-full text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
-                active ? 'text-white' : 'bg-[#F5F0FF] text-[#251B3A] hover:bg-[#EAE0FF]'
+              className={`min-h-[38px] px-3.5 rounded-full text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer transition-colors ${
+                active ? 'text-white' : 'bg-[#222128] text-white/75 hover:bg-[#2B2A34]'
               }`}
               style={active ? { backgroundColor: mood.color } : undefined}
             >
-              <MoodIcon className="w-4 h-4 shrink-0" style={active ? undefined : { color: mood.color }} />
+              <MoodIcon className="w-3.5 h-3.5 shrink-0" style={active ? undefined : { color: mood.color }} />
               <span>{mood.label}</span>
             </button>
           );
@@ -2092,7 +2830,7 @@ function PartyView({
           }}
         />
       ) : (
-        <div className="px-5 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="px-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           {visibleRooms.map((room) => (
             <VoiceRoomCard
               key={room.id}
@@ -2105,123 +2843,563 @@ function PartyView({
         </div>
       )}
 
-      <div className="px-5 mt-5 max-w-lg">
-        {creating ? (
+      {creating && (
+        <div
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-party-title"
+        >
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (!title.trim()) return;
-              onCreateRoom(title.trim(), selectedMood, selectedBg);
+              const cleanTitle = title.trim() || 'My Happy Party';
+              onCreateRoom({
+                title: cleanTitle,
+                mood: selectedMood,
+                backgroundId: selectedBg,
+                partyMode: selectedPartyMode,
+                welcomeMessage: welcomeMessage.trim(),
+                isLocked,
+              });
               setTitle('');
               setSelectedMood('happy');
               setSelectedBg('lounge');
+              setSelectedPartyMode('Free Mic');
+              setWelcomeMessage('');
+              setIsLocked(false);
               setCreating(false);
             }}
-            className="rounded-2xl bg-white border border-[#8B5CF6]/20 p-4 space-y-3 shadow-sm"
+            className="w-full max-w-lg max-h-[90vh] flex flex-col rounded-t-3xl sm:rounded-3xl bg-[#1D1C24] border border-white/10 shadow-2xl overflow-hidden"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-[#251B3A]">Create Voice Room</span>
+            {/* Modal Header */}
+            <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#8B5CF6] to-[#FF5C8A] flex items-center justify-center text-white">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 id="create-party-title" className="text-base font-extrabold text-white leading-tight">
+                    Create Party
+                  </h2>
+                  <p className="text-[11px] text-white/55">Customize your live voice room</p>
+                </div>
+              </div>
               <button
                 type="button"
                 onClick={() => setCreating(false)}
-                className="min-h-[44px] min-w-[44px] -mr-2 flex items-center justify-center text-[#8B8298] hover:text-[#251B3A] cursor-pointer"
-                aria-label="Close form"
+                className="min-h-[38px] min-w-[38px] rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white cursor-pointer transition-colors"
+                aria-label="Close Create Party modal"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Room name (e.g. Chill Vibes ☕)"
-              className="w-full min-h-[44px] px-3.5 rounded-xl border border-[#8B5CF6]/30 bg-white text-sm text-[#251B3A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
-            />
-            <div>
-              <div className="text-xs font-bold text-[#251B3A] mb-2">Pick a mood tag</div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {ROOM_MOODS.map((mood) => {
-                  const MoodIcon = mood.icon;
-                  const active = selectedMood === mood.id;
-                  return (
-                    <button
-                      key={mood.id}
-                      type="button"
-                      onClick={() => setSelectedMood(mood.id)}
-                      className={`min-h-[44px] px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-bold whitespace-nowrap cursor-pointer transition-colors ${
-                        active
-                          ? 'text-white shadow-sm'
-                          : 'bg-[#F5F0FF] text-[#251B3A] hover:bg-[#EAE0FF]'
-                      }`}
-                      style={active ? { backgroundColor: mood.color } : undefined}
+
+            {/* Scrollable Body */}
+            <div className="p-5 space-y-4 overflow-y-auto">
+              {/* Live Room Preview Card */}
+              <div
+                className="relative rounded-2xl p-4 overflow-hidden border border-white/15"
+                style={
+                  activeCreateBg.imageSrc
+                    ? {
+                        backgroundImage: `linear-gradient(135deg, rgba(16,14,26,0.72), rgba(22,19,38,0.88)), url(${activeCreateBg.imageSrc})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }
+                    : {
+                        backgroundImage:
+                          selectedBg === 'mood' ? getMoodRoomGradient(selectedMood) : activeCreateBg.gradient,
+                      }
+                }
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 text-white shadow-md"
+                      style={{ backgroundColor: activeCreateMood.color }}
                     >
-                      <MoodIcon className="w-4 h-4 shrink-0" style={active ? undefined : { color: mood.color }} />
-                      <span>{mood.label}</span>
+                      <ActiveCreateMoodIcon className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/15 text-white">
+                          {selectedPartyMode}
+                        </span>
+                        {isLocked && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FBBF24]/20 text-[#FDE68A]">
+                            <Lock className="w-2.5 h-2.5" /> Locked
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm font-extrabold text-white truncate mt-1">
+                        {title.trim() || 'My Happy Party'}
+                      </div>
+                      <div className="text-[11px] text-white/75 truncate">
+                        Host: You · {activeCreateMood.label} · {activeCreateBg.label}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Party Name + Quick Ideas */}
+              <div>
+                <label htmlFor="create-party-name" className="block text-xs font-bold text-white/85 mb-1.5">
+                  Party Name
+                </label>
+                <input
+                  id="create-party-name"
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  maxLength={48}
+                  placeholder="Enter a party title (e.g. Chill Vibes ☕)"
+                  className="w-full min-h-[44px] px-3.5 rounded-xl border border-white/15 bg-[#16151B] text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
+                />
+                <div className="flex items-center gap-1.5 overflow-x-auto pt-2 pb-0.5">
+                  {createTitleSuggestions.map((idea) => (
+                    <button
+                      key={idea}
+                      type="button"
+                      onClick={() => setTitle(idea)}
+                      className="px-2.5 py-1 rounded-full bg-[#2B2A34] hover:bg-[#363442] border border-white/10 text-[11px] font-medium text-white/80 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
+                    >
+                      {idea}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
+              </div>
+
+              {/* Party Mode */}
+              <div>
+                <div className="text-xs font-bold text-white/85 mb-2">Party Mode</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {createPartyModes.map((mode) => {
+                    const active = selectedPartyMode === mode;
+                    return (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setSelectedPartyMode(mode)}
+                        className={`min-h-[40px] px-3 py-2 rounded-xl flex items-center justify-between text-xs font-bold cursor-pointer border transition-colors ${
+                          active
+                            ? 'border-[#8B5CF6] bg-[#8B5CF6]/20 text-white'
+                            : 'border-white/10 bg-[#2B2A34] text-white/75 hover:bg-[#363442]'
+                        }`}
+                      >
+                        <span>{mode}</span>
+                        {active && <Check className="w-3.5 h-3.5 text-[#A78BFA] shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Mood Tag */}
+              <div>
+                <div className="text-xs font-bold text-white/85 mb-2">Mood Tag</div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {ROOM_MOODS.map((mood) => {
+                    const MoodIcon = mood.icon;
+                    const active = selectedMood === mood.id;
+                    return (
+                      <button
+                        key={mood.id}
+                        type="button"
+                        onClick={() => setSelectedMood(mood.id)}
+                        className={`min-h-[40px] px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-bold whitespace-nowrap cursor-pointer transition-colors ${
+                          active ? 'text-white shadow-sm' : 'bg-[#2B2A34] text-white/75 hover:bg-[#363442]'
+                        }`}
+                        style={active ? { backgroundColor: mood.color } : undefined}
+                      >
+                        <MoodIcon className="w-4 h-4 shrink-0" style={active ? undefined : { color: mood.color }} />
+                        <span>{mood.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Room Background */}
+              <div>
+                <div className="text-xs font-bold text-white/85 mb-2">Room Background</div>
+                <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                  {PARTY_BACKGROUNDS.map((bg) => {
+                    const active = selectedBg === bg.id;
+                    return (
+                      <button
+                        key={bg.id}
+                        type="button"
+                        onClick={() => setSelectedBg(bg.id)}
+                        className={`min-h-[46px] px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer border transition-colors ${
+                          active
+                            ? 'border-[#8B5CF6] bg-[#8B5CF6]/20 text-white'
+                            : 'border-white/10 bg-[#2B2A34] text-white/70 hover:text-white'
+                        }`}
+                      >
+                        <span
+                          className="w-5 h-5 rounded-md shrink-0 bg-cover bg-center border border-white/20"
+                          style={
+                            bg.imageSrc
+                              ? { backgroundImage: `url(${bg.imageSrc})` }
+                              : { backgroundImage: bg.gradient }
+                          }
+                        />
+                        <span>{bg.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Welcome Greeting & Privacy Lock */}
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="create-party-welcome" className="block text-xs font-bold text-white/85 mb-1.5">
+                    Welcome Wording (Optional)
+                  </label>
+                  <input
+                    id="create-party-welcome"
+                    type="text"
+                    value={welcomeMessage}
+                    onChange={(e) => setWelcomeMessage(e.target.value)}
+                    maxLength={80}
+                    placeholder="Welcome everyone! Grab a mic 🎙️"
+                    className="w-full min-h-[42px] px-3.5 rounded-xl border border-white/15 bg-[#16151B] text-xs text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsLocked((prev) => !prev)}
+                  className="w-full rounded-xl bg-[#2B2A34] hover:bg-[#363442] border border-white/10 px-3.5 py-2.5 flex items-center justify-between gap-3 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 text-left">
+                    {isLocked ? (
+                      <Lock className="w-4 h-4 text-[#FBBF24] shrink-0" />
+                    ) : (
+                      <Unlock className="w-4 h-4 text-[#34D399] shrink-0" />
+                    )}
+                    <div>
+                      <div className="text-xs font-bold text-white">
+                        {isLocked ? 'Locked Party (Approval Needed)' : 'Open Party (Anyone Can Join)'}
+                      </div>
+                      <div className="text-[11px] text-white/55">
+                        {isLocked ? 'Listeners need your invite to take a mic' : 'Guests can hop on open mic seats'}
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    className={`w-10 h-6 rounded-full p-0.5 transition-colors flex items-center shrink-0 ${
+                      isLocked ? 'bg-[#8B5CF6] justify-end' : 'bg-white/20 justify-start'
+                    }`}
+                  >
+                    <span className="w-5 h-5 rounded-full bg-white shadow" />
+                  </span>
+                </button>
               </div>
             </div>
-            <div>
-              <div className="text-xs font-bold text-[#251B3A] mb-2">Room background</div>
-              <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                {PARTY_BACKGROUNDS.map((bg) => {
-                  const active = selectedBg === bg.id;
-                  return (
-                    <button
-                      key={bg.id}
-                      type="button"
-                      onClick={() => setSelectedBg(bg.id)}
-                      className={`min-h-[40px] px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer border transition-colors ${
-                        active
-                          ? 'border-[#8B5CF6] bg-[#F5F0FF] text-[#251B3A]'
-                          : 'border-[#F5F0FF] bg-white text-[#6E657D] hover:bg-[#F5F0FF]/50'
-                      }`}
-                    >
-                      <span
-                        className="w-4 h-4 rounded-md shrink-0 bg-cover bg-center border border-black/10"
-                        style={
-                          bg.imageSrc
-                            ? { backgroundImage: `url(${bg.imageSrc})` }
-                            : { backgroundImage: bg.gradient }
-                        }
-                      />
-                      <span>{bg.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="flex items-center gap-2 pt-1">
+
+            {/* Footer CTA */}
+            <div className="px-5 py-4 border-t border-white/10 bg-[#18171F] flex items-center gap-2.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setCreating(false)}
-                className="min-h-[44px] px-4 rounded-xl bg-[#F5F0FF] text-[#251B3A] font-semibold text-sm cursor-pointer"
+                className="min-h-[44px] px-5 rounded-xl bg-[#2B2A34] hover:bg-[#363442] text-white font-semibold text-sm cursor-pointer transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 min-h-[44px] px-4 rounded-xl bg-[#8B5CF6] text-white font-bold text-sm cursor-pointer"
+                className="flex-1 min-h-[44px] px-5 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#FF5C8A] text-white font-extrabold text-sm cursor-pointer shadow-lg hover:opacity-95 transition-opacity"
               >
-                Join Room
+                Create Party
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* Floating Create Party | Random Dock */}
+      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 md:bottom-6 z-30 flex items-center rounded-full bg-[#2B2A34]/95 backdrop-blur-md border border-white/10 px-2 py-1.5 shadow-xl">
+        <button
+          type="button"
+          onClick={() => setCreating(true)}
+          className="px-4 py-1.5 rounded-full hover:bg-white/10 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+        >
+          <span className="w-6 h-6 rounded-full bg-gradient-to-br from-[#8B5CF6] to-[#FF5C8A] text-white flex items-center justify-center">
+            <Plus className="w-3.5 h-3.5" />
+          </span>
+          <span>Create Party</span>
+        </button>
+        <span className="w-px h-5 bg-white/15 mx-1" />
+        <button
+          type="button"
+          onClick={handleJoinRandom}
+          className="px-4 py-1.5 rounded-full hover:bg-white/10 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+        >
+          <span className="w-6 h-6 rounded-full bg-[#38BDF8]/20 text-[#38BDF8] flex items-center justify-center">
+            <Dice5 className="w-3.5 h-3.5" />
+          </span>
+          <span>Random</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MomentsFeedView({
+  posts,
+  likedPostIds,
+  followingAuthors,
+  onToggleLike,
+  onAddComment,
+  onSharePost,
+  onToggleFollow,
+  onSayHi,
+  onOpenCompose,
+}: {
+  posts: MomentPost[];
+  likedPostIds: string[];
+  followingAuthors: string[];
+  onToggleLike: (postId: string) => void;
+  onAddComment: (postId: string, text: string) => void;
+  onSharePost: (postId: string) => void;
+  onToggleFollow: (author: string) => void;
+  onSayHi: (author: string) => void;
+  onOpenCompose: () => void;
+}) {
+  const [feedTab, setFeedTab] = useState<'following' | 'foryou' | 'latest'>('foryou');
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+  const [openCommentsFor, setOpenCommentsFor] = useState<string | null>(null);
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+
+  const visiblePosts = posts.filter((post) => {
+    if (selectedTopicId && post.topicId !== selectedTopicId) return false;
+    if (feedTab === 'following') return followingAuthors.includes(post.author);
+    if (feedTab === 'latest') return post.tab === 'latest' || post.timeAgo.includes('Just now') || post.timeAgo.includes('mins');
+    return true;
+  });
+
+  return (
+    <div className="pb-24 min-h-full bg-[#16151B] text-white relative">
+      {/* Top Bar */}
+      <div className="px-4 pt-4 pb-3 flex items-center justify-between">
+        <div className="flex items-center gap-5">
+          {(
+            [
+              { id: 'following', label: 'Following', dot: true },
+              { id: 'foryou', label: 'For You', dot: false },
+              { id: 'latest', label: 'Latest', dot: false },
+            ] as const
+          ).map((t) => {
+            const active = feedTab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setFeedTab(t.id)}
+                className={`relative text-base font-extrabold cursor-pointer transition-colors ${
+                  active ? 'text-white' : 'text-white/45 hover:text-white/80'
+                }`}
+              >
+                {t.label}
+                {t.dot && <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#FF4D6D] ml-1 align-top" />}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          onClick={onOpenCompose}
+          aria-label="Post new moment"
+          className="w-10 h-10 rounded-full bg-[#222128] hover:bg-[#2B2A34] flex items-center justify-center text-white/80 cursor-pointer"
+        >
+          <Bell className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Story / Topic Circles */}
+      <div className="px-4 pb-4 flex items-start gap-3 overflow-x-auto">
+        {MOMENT_TOPICS.map((topic) => {
+          const active = selectedTopicId === topic.id;
+          return (
+            <button
+              key={topic.id}
+              type="button"
+              onClick={() => setSelectedTopicId((prev) => (prev === topic.id ? null : topic.id))}
+              className="flex flex-col items-center gap-1.5 w-[72px] shrink-0 cursor-pointer"
+            >
+              <div
+                className={`relative w-14 h-14 rounded-full p-0.5 ${active ? 'ring-2 ring-[#8B5CF6]' : ''}`}
+                style={{ background: topic.gradient }}
+              >
+                <div className="w-full h-full rounded-full bg-[#16151B]/30 flex items-center justify-center text-2xl">
+                  {topic.emoji}
+                </div>
+                <span className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[#8B5CF6] text-white text-[10px] font-extrabold flex items-center justify-center ring-2 ring-[#16151B]">
+                  #
+                </span>
+              </div>
+              <span className="text-[11px] text-white/80 text-center line-clamp-2 leading-tight">{topic.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Feed Cards */}
+      <div className="px-4 space-y-4">
+        {visiblePosts.length === 0 ? (
+          <div className="rounded-2xl bg-[#222128] border border-white/10 p-6 text-center space-y-2">
+            <p className="text-sm font-bold text-white">No moments here yet</p>
+            <p className="text-xs text-white/55">Follow creators in For You or tap All topics to explore.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setFeedTab('foryou');
+                setSelectedTopicId(null);
+              }}
+              className="mt-2 px-4 py-2 rounded-full bg-[#8B5CF6] text-white text-xs font-bold cursor-pointer"
+            >
+              Show For You
+            </button>
+          </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => setCreating(true)}
-            className="w-full min-h-[48px] rounded-full bg-[#8B5CF6] text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Create a room</span>
-          </button>
+          visiblePosts.map((post) => {
+            const isLiked = likedPostIds.includes(post.id);
+            const isFollowing = followingAuthors.includes(post.author);
+            const showComments = openCommentsFor === post.id;
+            const draft = commentDrafts[post.id] ?? '';
+            return (
+              <article key={post.id} className="rounded-2xl bg-[#222128] border border-white/5 p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <AvatarBadge name={post.author} size="md" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-sm text-white truncate">{post.author}</span>
+                      <span
+                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          post.gender === 'female'
+                            ? 'bg-[#FF5C8A]/20 text-[#FF85A6]'
+                            : 'bg-[#38BDF8]/20 text-[#60A5FA]'
+                        }`}
+                      >
+                        {post.gender === 'female' ? '♀' : '♂'} {post.age}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-white/45">{post.timeAgo}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onToggleFollow(post.author)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer transition-colors ${
+                      isFollowing
+                        ? 'bg-[#2B2A34] text-white/75'
+                        : 'bg-[#8B5CF6]/20 hover:bg-[#8B5CF6] text-[#C4B5FD] hover:text-white'
+                    }`}
+                  >
+                    {isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                </div>
+
+                <p className="text-sm text-white/90 leading-relaxed whitespace-pre-line">{post.caption}</p>
+
+                {post.imageBg && (
+                  <div
+                    className="w-full h-56 rounded-2xl flex items-center justify-center text-5xl border border-white/10 overflow-hidden"
+                    style={{ background: post.imageBg }}
+                  >
+                    <span>{post.imageEmoji ?? '✨'}</span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-1">
+                  <button
+                    type="button"
+                    onClick={() => onSayHi(post.author)}
+                    className="px-3.5 py-1.5 rounded-full border border-white/25 hover:border-white/50 text-white text-xs font-bold italic cursor-pointer transition-colors"
+                  >
+                    Say Hi
+                  </button>
+                  <div className="flex items-center gap-4 text-xs text-white/70">
+                    <button
+                      type="button"
+                      onClick={() => onToggleLike(post.id)}
+                      className={`inline-flex items-center gap-1 cursor-pointer transition-colors ${
+                        isLiked ? 'text-[#FF5C8A] font-bold' : 'hover:text-white'
+                      }`}
+                    >
+                      <Heart className={`w-4 h-4 ${isLiked ? 'fill-[#FF5C8A]' : ''}`} />
+                      <span className="tabular-nums">{post.likes}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOpenCommentsFor((prev) => (prev === post.id ? null : post.id))}
+                      className="inline-flex items-center gap-1 hover:text-white cursor-pointer"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span className="tabular-nums">{post.comments.length}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onSharePost(post.id)}
+                      className="inline-flex items-center gap-1 hover:text-white cursor-pointer"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      <span className="tabular-nums">{post.shares}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {showComments && (
+                  <div className="pt-2 border-t border-white/10 space-y-2">
+                    {post.comments.map((c) => (
+                      <div key={c.id} className="text-xs text-white/80 bg-[#16151B] rounded-xl px-3 py-2">
+                        <span className="font-bold text-[#A78BFA] mr-1.5">{c.author}:</span>
+                        <span>{c.text}</span>
+                      </div>
+                    ))}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!draft.trim()) return;
+                        onAddComment(post.id, draft);
+                        setCommentDrafts((prev) => ({ ...prev, [post.id]: '' }));
+                      }}
+                      className="flex gap-2"
+                    >
+                      <input
+                        type="text"
+                        value={draft}
+                        onChange={(e) => setCommentDrafts((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                        placeholder="Write a comment..."
+                        className="flex-1 min-h-[38px] px-3 rounded-xl bg-[#16151B] border border-white/10 text-xs text-white placeholder:text-white/40"
+                      />
+                      <button
+                        type="submit"
+                        className="px-3.5 rounded-xl bg-[#8B5CF6] text-white text-xs font-bold cursor-pointer"
+                      >
+                        Send
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </article>
+            );
+          })
         )}
       </div>
-      <p className="text-[#8B8298] text-[11px] px-5 pt-5">
-        Voice rooms are demo screens. Live audio needs a voice service connection.
-      </p>
+
+      {/* Floating Compose Button */}
+      <button
+        type="button"
+        onClick={onOpenCompose}
+        aria-label="Create Moment"
+        className="fixed bottom-24 right-5 md:bottom-8 md:right-8 z-30 w-13 h-13 rounded-full text-white flex items-center justify-center shadow-xl cursor-pointer transition-transform hover:scale-105"
+        style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)' }}
+      >
+        <Feather className="w-5 h-5" />
+      </button>
     </div>
   );
 }
@@ -2243,21 +3421,57 @@ function VoicePartyRoomView({
   onUpdateRoomBackground: (roomId: string, backgroundId: PartyBackgroundId, customBackground?: string | null) => void;
   onLeave: () => void;
 }) {
-  const [onStage, setOnStage] = useState(room.speakers.includes('You'));
-  const [isMuted, setIsMuted] = useState(true);
+  const [seats, setSeats] = useState<(string | null)[]>(() => {
+    const initial: (string | null)[] = Array(10).fill(null);
+    const hostName = room.owner ?? room.speakers[0] ?? 'Mina';
+    initial[0] = hostName;
+    return initial;
+  });
+  const [seatHearts, setSeatHearts] = useState<number[]>(() => Array(10).fill(0));
+  const [isMuted, setIsMuted] = useState(false);
   const [roomInput, setRoomInput] = useState('');
   const [lastReaction, setLastReaction] = useState<string | null>(null);
+  const [showReactionTray, setShowReactionTray] = useState(false);
   const [showGiftDrawer, setShowGiftDrawer] = useState(false);
   const [showBgDrawer, setShowBgDrawer] = useState(false);
+  const [showOffMicModal, setShowOffMicModal] = useState(true);
+  const [showRoomMenu, setShowRoomMenu] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showPartyModeModal, setShowPartyModeModal] = useState(false);
+  const [partyMode, setPartyMode] = useState<'Free Mic' | 'Music Lounge' | 'Karaoke' | 'Truth or Dare'>(
+    room.partyMode ?? 'Free Mic',
+  );
+  const [isPartyLocked, setIsPartyLocked] = useState(Boolean(room.isLocked));
+  const [blockAnimations, setBlockAnimations] = useState(false);
+  const [invitedFriends, setInvitedFriends] = useState<string[]>([]);
+  const [roomTitleText, setRoomTitleText] = useState(room.title);
+  const [editingRoomTitle, setEditingRoomTitle] = useState(false);
+  const [welcomeWording, setWelcomeWording] = useState(room.welcomeMessage?.trim() || 'Please click here to edit~');
+  const [editingWelcome, setEditingWelcome] = useState(false);
+  const [copiedRoomId, setCopiedRoomId] = useState(false);
   const [selectedGift, setSelectedGift] = useState<KhmerGift>(KHMER_GIFTS[0]);
   const giftRecipients = room.speakers.filter((s) => s !== 'You');
   const recipientOptions = giftRecipients.length > 0 ? giftRecipients : ['Mina', 'Dara', 'Sophy'];
   const [selectedRecipient, setSelectedRecipient] = useState(recipientOptions[0]);
   const [giftBanner, setGiftBanner] = useState<string | null>(null);
-  const [roomChat, setRoomChat] = useState<{ sender: string; text: string }[]>([
-    { sender: 'Mina', text: `Welcome to ${room.title}! 💜` },
-    { sender: 'Dara', text: 'Grab a mic seat, queue music, or customize the room background 🎙️🎨' },
+  const [roomChat, setRoomChat] = useState<{ sender: string; text: string; isSystem?: boolean }[]>([
+    { sender: room.owner ?? room.speakers[0] ?? 'Mina', text: 'is on the mic.', isSystem: true },
   ]);
+
+  const numericRoomId = (() => {
+    let hash = 71465514;
+    for (let i = 0; i < room.id.length; i += 1) {
+      hash = (hash * 31 + room.id.charCodeAt(i)) % 900000000;
+    }
+    return String(Math.abs(hash) + 100000000).slice(0, 9);
+  })();
+
+  const mySeatIndex = seats.findIndex((s) => s === 'You');
+  const onStage = mySeatIndex >= 0;
+  const offMicUsers = room.speakers.filter((s) => s !== 'You' && !seats.includes(s));
+  const totalHearts = seatHearts.reduce((acc, v) => acc + v, 0);
+  const heatDisplay = ((19.95 + totalHearts * 0.01 + (onStage ? 0.05 : 0))).toFixed(2) + 'K';
+  const chestPct = Math.min(100, 18 + totalHearts * 8 + roomChat.length * 4);
 
   const activeBgId: PartyBackgroundId = room.backgroundId ?? 'mood';
   const activeBgPreset = PARTY_BACKGROUNDS.find((b) => b.id === activeBgId) ?? PARTY_BACKGROUNDS[1];
@@ -2484,13 +3698,125 @@ function VoicePartyRoomView({
     });
   };
 
-  const speakers = onStage && !room.speakers.includes('You') ? ['You', ...room.speakers] : room.speakers;
-  const progressPct = Math.min(100, Math.round((elapsedSec / Math.max(1, currentTrack.durationSec)) * 100));
+  const handleJoinSeat = (index: number) => {
+    const occupant = seats[index];
+    if (occupant === 'You') {
+      setIsMuted((m) => !m);
+      return;
+    }
+    if (occupant !== null) {
+      setSeatHearts((prev) => prev.map((h, i) => (i === index ? h + 1 : h)));
+      setRoomChat((prev) => [...prev, { sender: 'You', text: `Sent ❤️ to ${occupant}` }]);
+      return;
+    }
+    if (isPartyLocked) {
+      setRoomChat((prev) => [...prev, { sender: 'System', text: '🔒 Party is currently locked by host.', isSystem: true }]);
+      return;
+    }
+    setSeats((prev) =>
+      prev.map((s, i) => {
+        if (i === index) return 'You';
+        return s === 'You' ? null : s;
+      }),
+    );
+    setIsMuted(false);
+    setRoomChat((prev) => [...prev, { sender: 'You', text: `joined mic seat #${index + 1}.`, isSystem: true }]);
+  };
+
+  const handleToggleQuickMicSeat = () => {
+    if (onStage) {
+      setSeats((prev) => prev.map((s) => (s === 'You' ? null : s)));
+      setIsMuted(true);
+      setRoomChat((prev) => [...prev, { sender: 'You', text: 'stepped down from the mic.', isSystem: true }]);
+    } else {
+      const openIdx = seats.findIndex((s) => s === null);
+      if (openIdx >= 0) {
+        handleJoinSeat(openIdx);
+      }
+    }
+  };
+
+  const renderSeatTile = (seatIdx: number, isTopRow: boolean) => {
+    const occupant = seats[seatIdx];
+    const isMe = occupant === 'You';
+    const isHost = seatIdx === 0;
+    const isSpeaking = occupant !== null && (isMe ? !isMuted : isHost);
+    const ringSize = isTopRow ? 'w-[62px] h-[62px]' : 'w-[54px] h-[54px]';
+
+    return (
+      <div key={seatIdx} className="flex flex-col items-center gap-1 min-w-[66px]">
+        <button
+          type="button"
+          onClick={() => handleJoinSeat(seatIdx)}
+          className="relative group cursor-pointer focus:outline-none"
+          aria-label={occupant ? `${occupant} mic seat` : `Join seat ${seatIdx + 1}`}
+        >
+          {occupant ? (
+            <>
+              <div
+                className={`${ringSize} rounded-full p-[2.5px] transition-transform group-hover:scale-105 ${
+                  isSpeaking
+                    ? 'bg-gradient-to-tr from-[#38BDF8] via-[#A855F7] to-[#EC4899] shadow-[0_0_14px_rgba(168,85,247,0.45)]'
+                    : 'bg-white/25'
+                }`}
+              >
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#6D28D9] to-[#BE185D] flex items-center justify-center text-white font-extrabold text-lg">
+                  {occupant.slice(0, 1).toUpperCase()}
+                </div>
+              </div>
+              <span
+                className={`absolute -bottom-0.5 right-0 w-5 h-5 rounded-full flex items-center justify-center border border-[#140E26] ${
+                  isSpeaking ? 'bg-[#38BDF8] text-[#0F172A]' : 'bg-[#1E1930] text-white/80'
+                }`}
+              >
+                {isSpeaking ? <Mic className="w-2.5 h-2.5" /> : <MicOff className="w-2.5 h-2.5" />}
+              </span>
+            </>
+          ) : (
+            <div
+              className={`${ringSize} rounded-full bg-[#241E3E]/65 hover:bg-[#312954]/80 border border-white/15 flex items-center justify-center text-white/75 transition-colors`}
+            >
+              <Armchair className={isTopRow ? 'w-6 h-6' : 'w-5 h-5'} />
+            </div>
+          )}
+        </button>
+
+        {occupant ? (
+          <div className="flex flex-col items-center gap-0.5 max-w-[78px]">
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-white truncate max-w-full">
+              {isHost && (
+                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-sm bg-[#8B5CF6] text-[9px] shrink-0">
+                  <Flag className="w-2.5 h-2.5 text-white" />
+                </span>
+              )}
+              <span className={`truncate ${isMe ? 'text-[#FFD77A]' : 'text-white'}`}>{occupant}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSeatHearts((prev) => prev.map((h, i) => (i === seatIdx ? h + 1 : h)))}
+              className="px-2 py-0.5 rounded-full bg-[#3A2848]/85 hover:bg-[#4F3562] text-[10px] font-bold text-[#F9A8D4] flex items-center gap-1 cursor-pointer tabular-nums"
+            >
+              <Heart className="w-2.5 h-2.5 fill-[#EC4899] text-[#EC4899]" />
+              <span>{seatHearts[seatIdx]}</span>
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => handleJoinSeat(seatIdx)}
+            className="px-3.5 py-0.5 rounded-full bg-white/15 hover:bg-white/25 text-white/90 text-[11px] font-semibold cursor-pointer transition-colors"
+          >
+            Join
+          </button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div
       className="min-h-screen text-white flex flex-col relative overflow-hidden"
-      style={{ backgroundColor: '#1A142D', backgroundImage: bgGradient }}
+      style={{ backgroundColor: '#120C24', backgroundImage: bgGradient }}
     >
       {bgImageUrl && (
         <div
@@ -2503,8 +3829,8 @@ function VoicePartyRoomView({
         aria-hidden="true"
         className={`pointer-events-none absolute inset-0 ${
           bgImageUrl
-            ? 'bg-gradient-to-b from-[#120D22]/75 via-[#16102B]/55 to-[#120D22]/85'
-            : 'bg-radial from-white/5 via-transparent to-black/25'
+            ? 'bg-gradient-to-b from-[#110B22]/80 via-[#150E2A]/65 to-[#0D0919]/92'
+            : 'bg-radial from-[#4C1D95]/20 via-[#150E2A]/60 to-[#0B0815]/90'
         }`}
       />
       <audio
@@ -2528,56 +3854,260 @@ function VoicePartyRoomView({
           setElapsedSec(0);
         }}
       />
-      <header className="relative z-10 px-4 py-3.5 flex items-center gap-2.5 border-b border-white/10 bg-[#140E26]/45 backdrop-blur-md">
+
+      {/* Top Room Header */}
+      <header className="relative z-20 px-3 pt-3 pb-2 flex items-center gap-2">
         <button
           type="button"
           onClick={onLeave}
           aria-label="Back"
-          className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-white/10 cursor-pointer shrink-0"
+          className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 cursor-pointer shrink-0"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        {(() => {
-          const mood = getRoomMood(room.mood);
-          const MoodIcon = mood.icon;
-          return (
+
+        <div className="flex-1 min-w-0">
+          {editingRoomTitle ? (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setEditingRoomTitle(false);
+              }}
+              className="flex items-center gap-1.5"
+            >
+              <input
+                type="text"
+                value={roomTitleText}
+                onChange={(e) => setRoomTitleText(e.target.value)}
+                onBlur={() => setEditingRoomTitle(false)}
+                autoFocus
+                className="flex-1 min-w-0 bg-white/15 border border-white/25 rounded-lg px-2 py-0.5 text-sm font-bold text-white focus:outline-none"
+              />
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditingRoomTitle(true)}
+              className="flex items-center gap-1.5 text-left max-w-full cursor-pointer group"
+            >
+              <Pencil className="w-3.5 h-3.5 text-white/75 shrink-0 group-hover:text-white" />
+              <h1 className="font-bold text-[15px] text-white truncate">{roomTitleText || room.title}</h1>
+            </button>
+          )}
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span className="text-[11px] text-white/65 tabular-nums">ID: {numericRoomId}</span>
+            <button
+              type="button"
+              onClick={() => {
+                void navigator.clipboard?.writeText(numericRoomId);
+                setCopiedRoomId(true);
+                window.setTimeout(() => setCopiedRoomId(false), 1500);
+              }}
+              aria-label="Copy room ID"
+              className="text-white/60 hover:text-white cursor-pointer inline-flex items-center gap-1"
+            >
+              <Copy className="w-3 h-3" />
+              {copiedRoomId && <span className="text-[10px] text-[#70D9FF]">Copied</span>}
+            </button>
+            {isPartyLocked && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/15 text-[10px] font-semibold text-[#FFD77A]">
+                <Lock className="w-2.5 h-2.5" /> Locked
+              </span>
+            )}
+            {partyMode !== 'Free Mic' && (
+              <span className="px-1.5 py-0.5 rounded bg-[#8B5CF6]/40 text-[10px] font-semibold text-white">
+                {partyMode}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowOffMicModal((v) => !v)}
+          aria-label="Off-mic users"
+          className="w-9 h-9 rounded-full bg-white/12 hover:bg-white/20 text-white text-xs font-bold flex items-center justify-center cursor-pointer tabular-nums shrink-0"
+        >
+          {offMicUsers.length}
+        </button>
+
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowRoomMenu((v) => !v)}
+            aria-label="Room options"
+            className="w-9 h-9 rounded-full bg-white/12 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer"
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+          {showRoomMenu && (
             <>
               <div
-                className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                style={{ backgroundColor: mood.color }}
-                title={mood.label}
-              >
-                <MoodIcon className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h1 className="font-extrabold text-[17px] truncate">{room.title}</h1>
-                <p className="text-[#CBBEE6] text-[11px] tabular-nums truncate">
-                  {room.listeners + 1} listening · {mood.label} · 💎 {diamonds}
-                </p>
+                onClick={() => setShowRoomMenu(false)}
+                className="fixed inset-0 z-30"
+              />
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white text-[#1E1C28] shadow-2xl py-2 z-40 text-[15px] font-medium">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRoomMenu(false);
+                    setShowInviteModal(true);
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3.5 hover:bg-[#F4F3F8] text-left cursor-pointer transition-colors"
+                >
+                  <UserPlus className="w-5 h-5 text-[#2D2A3A] shrink-0" strokeWidth={1.8} />
+                  <span>Invite Friend</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRoomMenu(false);
+                    setShowPartyModeModal(true);
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3.5 hover:bg-[#F4F3F8] text-left cursor-pointer transition-colors"
+                >
+                  <LayoutGrid className="w-5 h-5 text-[#2D2A3A] shrink-0" strokeWidth={1.8} />
+                  <span>Party Mode</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRoomMenu(false);
+                    setShowBgDrawer(true);
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3.5 hover:bg-[#F4F3F8] text-left cursor-pointer transition-colors"
+                >
+                  <Wand2 className="w-5 h-5 text-[#2D2A3A] shrink-0" strokeWidth={1.8} />
+                  <span>Decoration</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextLocked = !isPartyLocked;
+                    setIsPartyLocked(nextLocked);
+                    setShowRoomMenu(false);
+                    setRoomChat((prev) => [
+                      ...prev,
+                      {
+                        sender: 'System',
+                        text: nextLocked ? '🔒 Party locked by host.' : '🔓 Party unlocked.',
+                        isSystem: true,
+                      },
+                    ]);
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3.5 hover:bg-[#F4F3F8] text-left cursor-pointer transition-colors"
+                >
+                  {isPartyLocked ? (
+                    <Unlock className="w-5 h-5 text-[#8B5CF6] shrink-0" strokeWidth={1.8} />
+                  ) : (
+                    <Lock className="w-5 h-5 text-[#2D2A3A] shrink-0" strokeWidth={1.8} />
+                  )}
+                  <span>{isPartyLocked ? 'Unlock Party' : 'Lock Party'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextBlocked = !blockAnimations;
+                    setBlockAnimations(nextBlocked);
+                    setShowRoomMenu(false);
+                    if (nextBlocked) setGiftBanner(null);
+                    setRoomChat((prev) => [
+                      ...prev,
+                      {
+                        sender: 'System',
+                        text: nextBlocked ? '🚫 Gift & entry animations blocked.' : '✨ Animations enabled.',
+                        isSystem: true,
+                      },
+                    ]);
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3.5 hover:bg-[#F4F3F8] text-left cursor-pointer transition-colors"
+                >
+                  {blockAnimations ? (
+                    <Eye className="w-5 h-5 text-[#8B5CF6] shrink-0" strokeWidth={1.8} />
+                  ) : (
+                    <EyeOff className="w-5 h-5 text-[#2D2A3A] shrink-0" strokeWidth={1.8} />
+                  )}
+                  <span>{blockAnimations ? 'Allow Animation' : 'Block Animation'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowOffMicModal((v) => !v);
+                    setShowRoomMenu(false);
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3.5 hover:bg-[#F4F3F8] text-left cursor-pointer transition-colors"
+                >
+                  {showOffMicModal ? (
+                    <MicOff className="w-5 h-5 text-[#2D2A3A] shrink-0" strokeWidth={1.8} />
+                  ) : (
+                    <Mic className="w-5 h-5 text-[#8B5CF6] shrink-0" strokeWidth={1.8} />
+                  )}
+                  <span>{showOffMicModal ? 'Close Off-mic' : 'Open Off-mic'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowRoomMenu(false);
+                    onLeave();
+                  }}
+                  className="w-full px-4 py-3 flex items-center gap-3.5 hover:bg-[#FFF1F5] text-[#1E1C28] text-left cursor-pointer transition-colors"
+                >
+                  <LogOut className="w-5 h-5 text-[#2D2A3A] shrink-0" strokeWidth={1.8} />
+                  <span>Exit</span>
+                </button>
               </div>
             </>
-          );
-        })()}
-        <button
-          type="button"
-          onClick={() => setShowBgDrawer(true)}
-          aria-label="Change party background"
-          className="min-h-[38px] px-3 rounded-full bg-white/15 hover:bg-white/25 text-white font-semibold text-xs inline-flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
-        >
-          <Palette className="w-3.5 h-3.5" />
-          <span>Background</span>
-        </button>
-        <button
-          type="button"
-          onClick={onLeave}
-          className="px-4 py-2 rounded-full bg-[#FF5C8A] text-white font-bold text-xs cursor-pointer shrink-0"
-        >
-          Leave
-        </button>
+          )}
+        </div>
       </header>
 
-      <div className="relative z-10 flex-1 max-w-3xl w-full mx-auto px-4 py-4 flex flex-col gap-4">
-        {giftBanner && (
+      {/* Heat, Chest & Quick Music Ribbon */}
+      <div className="relative z-10 px-3 pb-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-[#D97706]/35 to-[#92400E]/25 border border-[#F59E0B]/35 text-[11px] font-bold text-[#FDE68A] tabular-nums shrink-0">
+            <Crown className="w-3.5 h-3.5 text-[#FBBF24] fill-[#FBBF24]" />
+            <span>{heatDisplay}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowGiftDrawer(true)}
+            className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/35 border border-white/10 cursor-pointer shrink-0"
+            title="Send gifts to level up chest"
+          >
+            <span className="text-sm leading-none">🧰</span>
+            <span className="w-12 h-2 rounded-full bg-white/15 overflow-hidden">
+              <span
+                className="block h-full rounded-full bg-gradient-to-r from-[#F59E0B] to-[#FBBF24]"
+                style={{ width: `${chestPct}%` }}
+              />
+            </span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowMusicDrawer(true)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/35 hover:bg-black/50 border border-white/12 text-[11px] font-semibold text-white/90 cursor-pointer max-w-[140px]"
+          >
+            <Disc3 className={`w-3.5 h-3.5 text-[#70D9FF] shrink-0 ${isMusicPlaying ? 'party-disc--playing' : ''}`} />
+            <span className="truncate">{isMusicPlaying ? currentTrack.title : 'Music'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowBgDrawer(true)}
+            aria-label="Room heat and atmosphere"
+            className="relative w-8 h-8 rounded-full bg-black/35 hover:bg-black/50 border border-white/10 flex items-center justify-center cursor-pointer"
+          >
+            <Flame className="w-4 h-4 text-[#FBBF24] fill-[#F59E0B]" />
+            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#EF4444]" />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Stage + Chat Area */}
+      <div className="relative z-10 flex-1 max-w-xl w-full mx-auto px-3 pb-2 flex flex-col justify-between gap-3">
+        {!blockAnimations && giftBanner && (
           <div className="rounded-xl bg-gradient-to-r from-[#68468E]/90 to-[#3F2B63]/90 backdrop-blur-md px-3.5 py-2 flex items-center justify-between text-xs font-bold text-[#FFD77A]">
             <span>{giftBanner}</span>
             <button type="button" onClick={() => setGiftBanner(null)} className="text-white/70 cursor-pointer">
@@ -2586,208 +4116,291 @@ function VoicePartyRoomView({
           </div>
         )}
 
-        <div className="rounded-2xl bg-[#22193D]/80 backdrop-blur-md border border-white/15 p-3 space-y-2.5">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setShowMusicDrawer(true)}
-              aria-label="Open Party Music jukebox"
-              className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 cursor-pointer"
-              style={{ backgroundColor: currentTrack.color }}
-            >
-              <Disc3 className={`w-6 h-6 text-white ${isMusicPlaying ? 'party-disc--playing' : ''}`} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowMusicDrawer(true)}
-              className="flex-1 min-w-0 text-left cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-[13px] text-white truncate">{currentTrack.title}</span>
-                {isMusicPlaying && (
-                  <span className="inline-flex items-end gap-0.5 h-3 shrink-0" aria-hidden="true">
-                    <span className="w-0.5 h-3 rounded-full bg-[#FF7EB6] party-eq-bar" />
-                    <span className="w-0.5 h-2 rounded-full bg-[#FFD77A] party-eq-bar" style={{ animationDelay: '0.2s' }} />
-                    <span className="w-0.5 h-3 rounded-full bg-[#70D9FF] party-eq-bar" style={{ animationDelay: '0.4s' }} />
-                  </span>
-                )}
-              </div>
-              <div className="text-[11px] text-[#CBBEE6] truncate tabular-nums">
-                {currentTrack.artist} · {currentTrack.vibe} · {formatTrackTime(elapsedSec)} / {formatTrackTime(currentTrack.durationSec)}
-              </div>
-            </button>
-            <div className="flex items-center gap-1.5 shrink-0">
+        {/* 10-Seat Interactive Stage (2 + 4 + 4) */}
+        <div className="pt-1 pb-2 space-y-4">
+          <div className="flex items-start justify-center gap-8">
+            {[0, 1].map((idx) => renderSeatTile(idx, true))}
+          </div>
+          <div className="grid grid-cols-4 gap-2 justify-items-center">
+            {[2, 3, 4, 5].map((idx) => renderSeatTile(idx, false))}
+          </div>
+          <div className="grid grid-cols-4 gap-2 justify-items-center">
+            {[6, 7, 8, 9].map((idx) => renderSeatTile(idx, false))}
+          </div>
+        </div>
+
+        {/* Floating Off-Mic Users Overlay */}
+        {showOffMicModal && (
+          <div className="rounded-2xl bg-[#090711]/92 backdrop-blur-lg border border-white/12 p-4 shadow-2xl">
+            <div className="relative flex items-center justify-center mb-3">
+              <h2 className="text-sm font-bold text-white">Off-mic Users({offMicUsers.length})</h2>
               <button
                 type="button"
-                onClick={toggleMusicPlayback}
-                aria-label={isMusicPlaying ? 'Pause party music' : 'Play party music'}
-                className="w-11 h-11 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white flex items-center justify-center cursor-pointer transition-colors"
+                onClick={() => setShowOffMicModal(false)}
+                aria-label="Close off-mic users"
+                className="absolute right-0 w-7 h-7 rounded-full flex items-center justify-center text-white/75 hover:text-white cursor-pointer"
               >
-                {isMusicPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
-              </button>
-              <button
-                type="button"
-                onClick={handleNextTrack}
-                aria-label="Next track"
-                className="w-10 h-10 rounded-full bg-[#392E5C] hover:bg-[#493B74] text-white flex items-center justify-center cursor-pointer transition-colors"
-              >
-                <SkipForward className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowMusicDrawer(true)}
-                aria-label="Music queue"
-                className="w-10 h-10 rounded-full bg-[#392E5C] hover:bg-[#493B74] text-white flex items-center justify-center cursor-pointer transition-colors"
-              >
-                <ListMusic className="w-4 h-4" />
+                <X className="w-4 h-4" />
               </button>
             </div>
+            {offMicUsers.length === 0 ? (
+              <p className="text-center text-xs text-white/75 py-5">
+                No off-mic users yet, gather some friends here~
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2 justify-center py-2">
+                {offMicUsers.map((person) => (
+                  <div
+                    key={person}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-xs font-semibold text-white"
+                  >
+                    <AvatarBadge name={person} size="xs" />
+                    <span>{person}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-[width] duration-300"
-              style={{ width: `${progressPct}%`, backgroundColor: currentTrack.color }}
-            />
-          </div>
-        </div>
+        )}
 
-        <div className="flex items-center justify-between">
-          <span className="text-[#FFD77A] font-bold text-xs">Speakers on stage</span>
-          {lastReaction && <span className="text-[#FF7EB6] font-bold text-xs">Reaction: {lastReaction}</span>}
-        </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-          {speakers.map((speaker, idx) => {
-            const isMe = speaker === 'You';
-            const speaking = isMe ? onStage && !isMuted : idx === 0;
-            return (
-              <div key={speaker} className="rounded-2xl bg-[#22193D]/78 backdrop-blur-md border border-white/10 py-3 px-2 flex flex-col items-center">
-                <div className="relative">
-                  <div
-                    className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-extrabold"
-                    style={{
-                      background: speaking
-                        ? 'linear-gradient(135deg, #FF7EB6, #8B5CF6)'
-                        : 'linear-gradient(135deg, #56477E, #3C315D)',
-                    }}
+        {/* Chat Stream, Welcome Wording & Party Tips + Right Floating Action Buttons */}
+        <div className="relative flex-1 flex flex-col justify-end min-h-[180px]">
+          <div className="pr-14 space-y-2 max-h-60 overflow-y-auto">
+            {/* Automatic Welcome Wording */}
+            <div className="rounded-xl bg-black/45 border border-white/10 px-3 py-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-[#FDE68A]">Automatic Welcome Wording</span>
+                <button
+                  type="button"
+                  onClick={() => setEditingWelcome((v) => !v)}
+                  aria-label="Edit welcome wording"
+                  className="text-white/70 hover:text-white cursor-pointer"
+                >
+                  <SquarePen className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {editingWelcome ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setEditingWelcome(false);
+                  }}
+                  className="mt-1.5 flex items-center gap-1.5"
+                >
+                  <input
+                    type="text"
+                    value={welcomeWording}
+                    onChange={(e) => setWelcomeWording(e.target.value)}
+                    placeholder="Enter welcome message..."
+                    autoFocus
+                    className="flex-1 bg-white/10 border border-white/20 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="px-2.5 py-1 rounded-lg bg-[#8B5CF6] text-white text-[11px] font-bold cursor-pointer"
                   >
-                    {speaker.slice(0, 1)}
-                  </div>
-                  <div
-                    className={`absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center ${
-                      speaking ? 'bg-emerald-500' : 'bg-[#1A142D]'
-                    }`}
-                  >
-                    {speaking ? <Mic className="w-3 h-3" /> : <MicOff className="w-3 h-3" />}
-                  </div>
+                    Save
+                  </button>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setEditingWelcome(true)}
+                  className="mt-0.5 text-left text-xs text-white/85 hover:text-white cursor-pointer block w-full"
+                >
+                  {welcomeWording}
+                </button>
+              )}
+            </div>
+
+            {/* Party Tips Card */}
+            <div className="rounded-xl bg-black/45 border border-white/10 px-3 py-2 text-xs leading-relaxed">
+              <div className="font-bold text-[#38BDF8]">Party Tips:</div>
+              <p className="text-[#38BDF8]/90">
+                Tell you a secret about using room heating - after heating, the more people chatting on the mic in your room and the more attention you receive, the room will have the opportunity to get more traffic in the future:)
+              </p>
+            </div>
+
+            {/* Room Messages */}
+            {roomChat.map((entry, idx) =>
+              entry.isSystem ? (
+                <div
+                  key={idx}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-black/50 border border-white/10 px-3 py-1.5 text-xs"
+                >
+                  <span className="text-[#93C5FD] font-bold">{entry.sender}</span>
+                  <span className="text-white/90">{entry.text}</span>
                 </div>
-                <span className={`font-bold text-xs mt-2 ${isMe ? 'text-[#FFD77A]' : 'text-white'}`}>
-                  {speaker}
-                </span>
-                <span className="text-[10px] text-[#CBBEE6]">{speaking ? 'Speaking' : 'Listening'}</span>
-              </div>
-            );
-          })}
-        </div>
+              ) : (
+                <div
+                  key={idx}
+                  className="rounded-xl bg-black/45 border border-white/10 px-3 py-1.5 text-xs"
+                >
+                  <span className="text-[#FF7EB6] font-bold">{entry.sender}: </span>
+                  <span className="text-white/95">{entry.text}</span>
+                </div>
+              ),
+            )}
 
-        <div className="flex-1 flex flex-col gap-2">
-          <span className="text-[#CBBEE6] font-bold text-xs">Room chat</span>
-          <div className="space-y-1.5 max-h-56 overflow-y-auto">
-            {roomChat.map((entry, idx) => (
-              <div key={idx} className="rounded-xl bg-[#20183A]/80 backdrop-blur-sm border border-white/10 px-3 py-2 text-xs">
-                <span className="text-[#FF7EB6] font-bold">{entry.sender}: </span>
-                <span>{entry.text}</span>
+            <div className="rounded-xl bg-black/40 border border-white/10 px-3 py-1.5 text-xs">
+              <div className="font-bold text-[#38BDF8]">Party Tips:</div>
+              <div className="text-[#38BDF8]/90">Please wear headphones to avoid echoes.</div>
+            </div>
+          </div>
+
+          {/* Floating Right Action Pills */}
+          <div className="absolute right-0 bottom-1 flex flex-col items-center gap-2.5">
+            {lastReaction && (
+              <div className="px-2.5 py-1 rounded-full bg-black/60 border border-white/15 text-xs font-bold">
+                {lastReaction}
               </div>
-            ))}
+            )}
+            <button
+              type="button"
+              onClick={handleToggleQuickMicSeat}
+              aria-label={onStage ? 'Leave mic seat' : 'Join open mic seat'}
+              className={`w-11 h-11 rounded-full flex items-center justify-center border shadow-lg cursor-pointer transition-colors ${
+                onStage
+                  ? 'bg-[#38BDF8] text-[#0F172A] border-white/40'
+                  : 'bg-[#16192C]/90 text-[#38BDF8] border-white/20 hover:bg-[#1E2540]'
+              }`}
+            >
+              <Armchair className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowMusicDrawer(true)}
+              aria-label="Open Party Music Jukebox"
+              className="w-11 h-11 rounded-full bg-gradient-to-br from-[#F59E0B] via-[#EC4899] to-[#8B5CF6] p-[2px] shadow-lg cursor-pointer"
+            >
+              <div className="w-full h-full rounded-full bg-[#1C1433] flex flex-col items-center justify-center">
+                <Disc3 className={`w-4 h-4 text-[#FFD77A] ${isMusicPlaying ? 'party-disc--playing' : ''}`} />
+                <span className="text-[7px] font-extrabold text-white leading-none mt-0.5">MUSIC</span>
+              </div>
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="relative z-10 bg-[#1B1432]/85 backdrop-blur-md border-t border-white/10 px-4 py-3 space-y-2.5 sticky bottom-0">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!roomInput.trim()) return;
-            setRoomChat((prev) => [...prev, { sender: 'You', text: roomInput.trim() }]);
-            setRoomInput('');
-          }}
-          className="max-w-3xl mx-auto flex items-center gap-2"
-        >
-          <input
-            type="text"
-            value={roomInput}
-            onChange={(e) => setRoomInput(e.target.value)}
-            placeholder="Say something in room..."
-            className="flex-1 h-10 px-4 rounded-3xl bg-[#1A142D] border border-white/20 text-xs text-white placeholder:text-[#A799C4] focus:outline-none focus:border-[#8B5CF6]"
-          />
+      {/* Quick Emoji Reaction Strip */}
+      {showReactionTray && (
+        <div className="relative z-20 px-4 pb-2 flex justify-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1E1638]/95 border border-white/15 shadow-xl">
+            {['❤️', '👏', '🔥', '😂', '🎉'].map((emoji) => (
+              <button
+                key={emoji}
+                type="button"
+                onClick={() => {
+                  setLastReaction(emoji);
+                  setRoomChat((prev) => [...prev, { sender: 'You', text: `Sent ${emoji}` }]);
+                  setShowReactionTray(false);
+                }}
+                className="w-9 h-9 rounded-full hover:bg-white/15 flex items-center justify-center text-lg cursor-pointer"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Sleek Bottom Action Bar matching screenshot */}
+      <div className="relative z-20 bg-[#0D0919]/85 backdrop-blur-md border-t border-white/10 px-3 py-2.5 sticky bottom-0">
+        <div className="max-w-xl mx-auto flex items-center gap-2">
           <button
-            type="submit"
-            aria-label="Send"
-            className="w-10 h-10 rounded-full bg-[#8B5CF6] text-white flex items-center justify-center cursor-pointer"
+            type="button"
+            onClick={() => {
+              if (!isMusicPlaying) {
+                toggleMusicPlayback();
+              } else {
+                setIsMusicMuted((m) => !m);
+              }
+            }}
+            aria-label={isMusicMuted || !isMusicPlaying ? 'Turn room audio on' : 'Mute room audio'}
+            className="w-10 h-10 rounded-full bg-white/12 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer shrink-0"
           >
-            <Send className="w-4 h-4" />
+            {isMusicMuted || !isMusicPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-[#70D9FF]" />}
           </button>
-        </form>
-        <div className="max-w-3xl mx-auto flex items-center gap-2">
+
           <button
             type="button"
             onClick={() => {
               if (!onStage) {
-                setOnStage(true);
-                setIsMuted(false);
+                handleToggleQuickMicSeat();
               } else {
                 setIsMuted((m) => !m);
               }
             }}
-            className={`flex-1 min-h-[42px] rounded-full font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer ${
-              onStage && !isMuted ? 'bg-[#8B5CF6] text-white' : 'bg-[#392E5C] text-white'
+            aria-label={onStage && !isMuted ? 'Mute microphone' : 'Unmute microphone'}
+            className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer shrink-0 ${
+              onStage && !isMuted ? 'bg-[#8B5CF6] text-white' : 'bg-white/12 hover:bg-white/20 text-white'
             }`}
           >
             {onStage && !isMuted ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-            <span>{!onStage ? 'Take Mic' : isMuted ? 'Unmute' : 'Mic Live'}</span>
           </button>
-          {onStage && (
-            <button
-              type="button"
-              onClick={() => {
-                setOnStage(false);
-                setIsMuted(true);
-              }}
-              className="px-4 min-h-[42px] rounded-full border border-white/30 text-xs font-semibold cursor-pointer"
-            >
-              Leave Mic
-            </button>
-          )}
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!roomInput.trim()) return;
+              setRoomChat((prev) => [...prev, { sender: 'You', text: roomInput.trim() }]);
+              setRoomInput('');
+            }}
+            className="flex-1 min-w-0 flex items-center bg-white/12 border border-white/15 rounded-full h-10 px-3.5"
+          >
+            <input
+              type="text"
+              value={roomInput}
+              onChange={(e) => setRoomInput(e.target.value)}
+              placeholder="Enter"
+              className="flex-1 min-w-0 bg-transparent text-xs text-white placeholder:text-white/55 focus:outline-none"
+            />
+            {roomInput.trim().length > 0 && (
+              <button
+                type="submit"
+                aria-label="Send message"
+                className="text-[#70D9FF] hover:text-white ml-1.5 cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </form>
+
+          <button
+            type="button"
+            onClick={() => setShowReactionTray((v) => !v)}
+            aria-label="Reactions"
+            className="w-10 h-10 rounded-full bg-white/12 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer shrink-0"
+          >
+            <Smile className="w-5 h-5" />
+          </button>
+
           <button
             type="button"
             onClick={() => setShowMusicDrawer(true)}
             aria-label="Open Party Music"
-            className={`w-10 h-10 rounded-full flex items-center justify-center cursor-pointer shrink-0 ${
-              isMusicPlaying ? 'bg-[#5B6EE1] text-white ring-2 ring-white/30' : 'bg-[#5B6EE1] text-white'
-            }`}
+            className="w-10 h-10 rounded-full bg-[#3D2520] border border-[#F59E0B]/40 text-[#FBBF24] flex items-center justify-center cursor-pointer shrink-0"
           >
             <Music className="w-4 h-4" />
           </button>
+
           <button
             type="button"
             onClick={() => setShowGiftDrawer(true)}
             aria-label="Send Party Gift"
-            className="w-10 h-10 rounded-full bg-[#FFD16B] text-[#24152F] flex items-center justify-center cursor-pointer shrink-0"
+            className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F472B6] to-[#8B5CF6] text-white flex items-center justify-center cursor-pointer shrink-0 shadow"
           >
             <Gift className="w-4 h-4" />
           </button>
-          {['❤️', '👏', '🔥'].map((emoji) => (
-            <button
-              key={emoji}
-              type="button"
-              onClick={() => {
-                setLastReaction(emoji);
-                setRoomChat((prev) => [...prev, { sender: 'You', text: `Sent ${emoji}` }]);
-              }}
-              className="w-10 h-10 rounded-full bg-[#392E5C] flex items-center justify-center text-base cursor-pointer shrink-0"
-            >
-              {emoji}
-            </button>
-          ))}
+
+          <button
+            type="button"
+            onClick={() => setShowBgDrawer(true)}
+            aria-label="Room Background & Settings"
+            className="w-10 h-10 rounded-full bg-white/12 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer shrink-0"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -3112,6 +4725,113 @@ function VoicePartyRoomView({
         </div>
       )}
 
+      {showInviteModal && (
+        <div
+          onClick={() => setShowInviteModal(false)}
+          className="fixed inset-0 z-50 bg-[#0A0712]/70 flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-3xl bg-[#222128] border border-white/10 p-5 space-y-3.5 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-extrabold text-white">Invite Friend to Party</h2>
+              <button
+                type="button"
+                onClick={() => setShowInviteModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {['Mina', 'Dara', 'Sophy', 'Alex', 'Nita'].map((friendName) => {
+                const invited = invitedFriends.includes(friendName);
+                return (
+                  <div
+                    key={friendName}
+                    className="flex items-center justify-between rounded-2xl bg-[#2B2A34] px-3.5 py-2.5"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <AvatarBadge name={friendName} size="sm" />
+                      <span className="text-sm font-semibold text-white">{friendName}</span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={invited}
+                      onClick={() => {
+                        setInvitedFriends((prev) => [...prev, friendName]);
+                        setRoomChat((prev) => [
+                          ...prev,
+                          { sender: 'You', text: `📨 Invited ${friendName} to join the room!` },
+                        ]);
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold cursor-pointer ${
+                        invited ? 'bg-white/10 text-[#9E9BB0]' : 'bg-[#8B5CF6] text-white'
+                      }`}
+                    >
+                      {invited ? 'Invited' : 'Invite'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPartyModeModal && (
+        <div
+          onClick={() => setShowPartyModeModal(false)}
+          className="fixed inset-0 z-50 bg-[#0A0712]/70 flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-3xl bg-[#222128] border border-white/10 p-5 space-y-3.5 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-extrabold text-white">Choose Party Mode</h2>
+              <button
+                type="button"
+                onClick={() => setShowPartyModeModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              {(['Free Mic', 'Music Lounge', 'Karaoke', 'Truth or Dare'] as const).map((modeOption) => {
+                const active = partyMode === modeOption;
+                return (
+                  <button
+                    key={modeOption}
+                    type="button"
+                    onClick={() => {
+                      setPartyMode(modeOption);
+                      setRoomChat((prev) => [
+                        ...prev,
+                        { sender: 'System', text: `🎛️ Party Mode set to ${modeOption}`, isSystem: true },
+                      ]);
+                      setShowPartyModeModal(false);
+                    }}
+                    className={`rounded-2xl p-3 text-left border cursor-pointer transition-colors ${
+                      active
+                        ? 'bg-[#8B5CF6]/25 border-[#8B5CF6] text-white'
+                        : 'bg-[#2B2A34] border-white/5 text-[#CBBEE6] hover:text-white'
+                    }`}
+                  >
+                    <div className="text-sm font-bold">{modeOption}</div>
+                    <div className="text-[11px] text-[#9E9BB0] mt-0.5">
+                      {active ? 'Active mode' : 'Tap to switch'}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {showBgDrawer && (
         <div
           onClick={() => setShowBgDrawer(false)}
@@ -3198,33 +4918,69 @@ function VoicePartyRoomView({
 function ProfileView({
   displayName,
   bio,
+  userStatusText,
+  userOccupation,
+  userInterests,
   profilePhoto,
   coverPhoto,
+  diamonds,
   giftHistory,
   currentFamily,
   friendsCount,
   friendRequestCount,
+  rooms,
+  posts,
   onOpenFriends,
   onOpenFamily,
+  onOpenShop,
+  onOpenGame,
+  onOpenAddMusic,
+  onOpenStatusModal,
+  onOpenCompose,
+  onJoinMyRoom,
   onSave,
 }: {
   displayName: string;
   bio: string;
+  userStatusText: string;
+  userOccupation: string;
+  userInterests: string[];
   profilePhoto: string | null;
   coverPhoto: string | null;
+  diamonds: number;
   giftHistory: GiftRecord[];
   currentFamily: FamilyClub | null;
   friendsCount: number;
   friendRequestCount: number;
+  rooms: VoiceRoom[];
+  posts: MomentPost[];
   onOpenFriends: () => void;
   onOpenFamily: () => void;
-  onSave: (next: { displayName: string; bio: string; profilePhoto: string | null; coverPhoto: string | null }) => void;
+  onOpenShop: () => void;
+  onOpenGame: () => void;
+  onOpenAddMusic: () => void;
+  onOpenStatusModal: () => void;
+  onOpenCompose: () => void;
+  onJoinMyRoom: () => void;
+  onSave: (next: {
+    displayName: string;
+    bio: string;
+    occupation: string;
+    interests: string[];
+    profilePhoto: string | null;
+    coverPhoto: string | null;
+  }) => void;
 }) {
   const [name, setName] = useState(displayName);
   const [about, setAbout] = useState(bio);
+  const [occupation, setOccupation] = useState(userOccupation);
+  const [interestsInput, setInterestsInput] = useState(userInterests.join(', '));
   const [avatar, setAvatar] = useState(profilePhoto);
   const [cover, setCover] = useState(coverPhoto);
-  const [saved, setSaved] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [savedToast, setSavedToast] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
+  const [showInspiration, setShowInspiration] = useState(true);
   const [historyFilter, setHistoryFilter] = useState<'all' | 'sent' | 'received'>('all');
 
   const pickFile = (e: React.ChangeEvent<HTMLInputElement>, setter: (v: string) => void) => {
@@ -3242,78 +4998,312 @@ function ProfileView({
   });
 
   const myRole = currentFamily?.members.find((m) => m.name === 'You')?.role ?? 'Member';
+  const myRoom = rooms[0];
+  const pinnedPost = posts[0];
+
+  const handleCopyId = () => {
+    navigator.clipboard?.writeText('7146551484').catch(() => {});
+    setCopiedId(true);
+    window.setTimeout(() => setCopiedId(false), 1800);
+  };
 
   return (
-    <div className="pb-10 max-w-2xl">
-      <div className="px-5 py-4">
-        <h1 className="text-[27px] font-extrabold text-[#251B3A]">My Profile</h1>
-        <p className="text-[13px] text-[#8B8298]">Your space, your identity</p>
+    <div className="pb-28 min-h-full bg-[#16151B] text-white relative">
+      {/* Cover Header & Top Action Bar */}
+      <div className="relative h-44 sm:h-52 w-full overflow-hidden">
+        {cover ? (
+          <img src={cover} alt="Cover" className="w-full h-full object-cover" />
+        ) : (
+          <div
+            className="w-full h-full"
+            style={{ background: 'linear-gradient(135deg, #D97706 0%, #7C3AED 55%, #1E1B4B 100%)' }}
+          />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-[#16151B]" />
+
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={onOpenShop}
+            className="min-h-[34px] px-3 rounded-full bg-black/45 backdrop-blur-md border border-white/15 flex items-center gap-1.5 text-xs font-bold text-white cursor-pointer hover:bg-black/65 transition-colors"
+          >
+            <span className="text-[#38BDF8]">💎</span>
+            <span className="tabular-nums">Recharge ({diamonds})</span>
+            <span className="w-4 h-4 rounded-full bg-[#38BDF8] text-[#16151B] flex items-center justify-center text-[11px] font-extrabold">
+              +
+            </span>
+          </button>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={onOpenGame}
+              aria-label="Human Battle Game"
+              className="w-9 h-9 rounded-full bg-black/45 backdrop-blur-md border border-white/10 flex items-center justify-center text-white cursor-pointer hover:bg-black/65"
+            >
+              <Gamepad2 className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onOpenFamily}
+              aria-label="Family Club"
+              className="w-9 h-9 rounded-full bg-black/45 backdrop-blur-md border border-white/10 flex items-center justify-center text-white cursor-pointer hover:bg-black/65"
+            >
+              <Crown className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={onOpenFriends}
+              aria-label="Friends"
+              className="relative w-9 h-9 rounded-full bg-black/45 backdrop-blur-md border border-white/10 flex items-center justify-center text-white cursor-pointer hover:bg-black/65"
+            >
+              <Star className="w-4 h-4" />
+              {friendRequestCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#FF4D6D] ring-2 ring-[#16151B]" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={onOpenAddMusic}
+              aria-label="Music Library"
+              className="w-9 h-9 rounded-full bg-black/45 backdrop-blur-md border border-white/10 flex items-center justify-center text-white cursor-pointer hover:bg-black/65"
+            >
+              <Headphones className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowEditModal(true)}
+              aria-label="Edit Profile"
+              className="w-9 h-9 rounded-full bg-black/45 backdrop-blur-md border border-white/10 flex items-center justify-center text-white cursor-pointer hover:bg-black/65"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
-      <div className="px-[18px]">
-        <label
-          className="w-full h-[140px] rounded-[20px] overflow-hidden flex items-center justify-center cursor-pointer"
-          style={{ background: 'linear-gradient(135deg, #FF7EB6 0%, #8B5CF6 100%)' }}
-        >
-          <input type="file" accept="image/*" className="hidden" onChange={(e) => pickFile(e, setCover)} />
-          {cover ? (
-            <img src={cover} alt="Cover" className="w-full h-full object-cover" />
-          ) : (
-            <div className="flex flex-col items-center text-white">
-              <ImagePlus className="w-7 h-7 mb-1" />
-              <span className="text-[13px]">Tap to add cover photo</span>
-            </div>
-          )}
-        </label>
-      </div>
-      <div className="flex flex-col items-center mt-3">
-        <label
-          className="w-[112px] h-[112px] rounded-full overflow-hidden flex items-center justify-center cursor-pointer"
-          style={{ background: 'linear-gradient(135deg, #FF7EB6 0%, #8B5CF6 100%)' }}
-        >
-          <input type="file" accept="image/*" className="hidden" onChange={(e) => pickFile(e, setAvatar)} />
-          {avatar ? (
-            <img src={avatar} alt="Profile" className="w-full h-full object-cover" />
-          ) : (
-            <Camera className="w-10 h-10 text-white" />
-          )}
-        </label>
-        <p className="text-[#8B8298] text-[11px] mt-1.5">Tap photo to choose from Gallery</p>
-      </div>
-      <div className="px-5 mt-4 space-y-3">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
-          className="w-full px-3.5 py-2.5 rounded-xl border border-[#8B8298]/40 bg-white text-sm"
-        />
-        <textarea
-          rows={2}
-          value={about}
-          onChange={(e) => setAbout(e.target.value)}
-          placeholder="Bio"
-          className="w-full px-3.5 py-2.5 rounded-xl border border-[#8B8298]/40 bg-white text-sm resize-none"
-        />
+
+      {/* Overlapping Avatar + Soulmate CP Pill */}
+      <div className="px-4 -mt-10 relative z-10 flex items-end justify-between gap-3">
+        <div className="flex items-end gap-3">
+          <label className="relative w-20 h-20 rounded-full overflow-hidden ring-4 ring-[#16151B] cursor-pointer shrink-0 bg-[#DC2626] flex items-center justify-center">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) =>
+                pickFile(e, (nextImg) => {
+                  setAvatar(nextImg);
+                  onSave({
+                    displayName: name,
+                    bio: about,
+                    occupation,
+                    interests: userInterests,
+                    profilePhoto: nextImg,
+                    coverPhoto: cover,
+                  });
+                })
+              }
+            />
+            {avatar ? (
+              <img src={avatar} alt={displayName} className="w-full h-full object-cover" />
+            ) : (
+              <Camera className="w-8 h-8 text-white/90" />
+            )}
+          </label>
+
+          {/* Soulmate CP Widget */}
+          <button
+            type="button"
+            onClick={onOpenFriends}
+            className="mb-1 px-3 py-1.5 rounded-full bg-[#2B2540] border border-[#8B5CF6]/30 flex items-center gap-2 cursor-pointer hover:bg-[#352E4E] transition-colors"
+          >
+            <span className="text-base">💍</span>
+            <AvatarBadge name="Mina" size="xs" />
+            <span className="text-xs font-extrabold text-[#C4B5FD] tabular-nums">30.4K</span>
+          </button>
+        </div>
+
         <button
           type="button"
-          onClick={() => {
-            onSave({ displayName: name, bio: about, profilePhoto: avatar, coverPhoto: cover });
-            setSaved(true);
-            window.setTimeout(() => setSaved(false), 1800);
-          }}
-          className="w-full min-h-[48px] rounded-full bg-[#8B5CF6] text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"
+          onClick={() => setShowEditModal(true)}
+          className="mb-1 px-3.5 py-1.5 rounded-full bg-[#2B2A34] hover:bg-[#383645] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
         >
-          {saved ? <Check className="w-5 h-5" /> : <Save className="w-5 h-5" />}
-          <span>{saved ? 'Saved!' : 'Save profile'}</span>
+          <Pencil className="w-3.5 h-3.5" />
+          <span>Edit</span>
         </button>
       </div>
 
-      {/* My Friends & Family Sections */}
-      <section className="px-5 mt-6 space-y-2.5">
+      {/* User Identity */}
+      <div className="px-4 mt-3 space-y-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h1 className="text-xl font-extrabold text-white">{displayName}</h1>
+          <span className="px-2 py-0.5 rounded-full bg-[#38BDF8]/20 text-[#60A5FA] text-[11px] font-bold">
+            ♂ 22
+          </span>
+          {savedToast && <span className="text-xs font-bold text-[#34D399]">Saved ✓</span>}
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-white/55">
+          <span className="tabular-nums">ID: 7146551484</span>
+          <button
+            type="button"
+            onClick={handleCopyId}
+            aria-label="Copy ID"
+            className="text-white/60 hover:text-white inline-flex items-center gap-1 cursor-pointer"
+          >
+            {copiedId ? <Check className="w-3.5 h-3.5 text-[#34D399]" /> : <Copy className="w-3.5 h-3.5" />}
+            {copiedId && <span className="text-[11px] text-[#34D399]">Copied</span>}
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={onOpenStatusModal}
+            className="px-3 py-1 rounded-full bg-[#2B2540] hover:bg-[#3A3156] text-[#C4B5FD] text-xs font-bold inline-flex items-center gap-1 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>{userStatusText ? userStatusText : 'Status'}</span>
+          </button>
+        </div>
+
+        <p className="text-sm font-semibold text-[#C4B5FD] pt-0.5">{bio}</p>
+
+        <div className="flex items-center gap-2 text-xs text-white/80">
+          <span>{userOccupation}</span>
+          <button
+            type="button"
+            onClick={() => setShowEditModal(true)}
+            aria-label="Edit occupation"
+            className="text-white/50 hover:text-white cursor-pointer"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-1.5 text-xs text-white/50">
+          <Calendar className="w-3.5 h-3.5" />
+          <span>Joined March 2026</span>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap pt-0.5">
+          {userInterests.map((tag) => (
+            <span
+              key={tag}
+              className="px-3 py-1 rounded-full bg-[#222128] border border-white/10 text-xs text-white/80"
+            >
+              {tag}
+            </span>
+          ))}
+          <button
+            type="button"
+            onClick={() => setShowEditModal(true)}
+            aria-label="Edit interests"
+            className="w-7 h-7 rounded-full bg-[#222128] flex items-center justify-center text-white/55 hover:text-white cursor-pointer"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Stats Row */}
+        <div className="flex items-center gap-4 pt-2 text-xs text-white/60 flex-wrap tabular-nums">
+          <button type="button" onClick={onOpenFriends} className="hover:text-white cursor-pointer">
+            <strong className="text-white font-extrabold">{friendsCount + 10}</strong> Following
+          </button>
+          <span>
+            <strong className="text-white font-extrabold">203</strong> Follower
+          </span>
+          <span>
+            <strong className="text-white font-extrabold">5.82K</strong> Visited
+          </span>
+          <span>
+            <strong className="text-white font-extrabold">{rooms.length}</strong> Rooms
+          </span>
+        </div>
+
+        {/* My Voice Room Card */}
+        {myRoom && (
+          <button
+            type="button"
+            onClick={onJoinMyRoom}
+            className="w-full mt-2 rounded-2xl bg-[#222128] hover:bg-[#2B2A34] border border-white/10 p-3.5 flex items-center gap-3 text-left cursor-pointer transition-colors"
+          >
+            <div className="w-11 h-11 rounded-full bg-[#2B2A34] flex items-center justify-center text-white/85 shrink-0">
+              <Mic className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-bold text-white truncate">{myRoom.title}</div>
+              <div className="text-[11px] text-white/55 flex items-center gap-1 tabular-nums mt-0.5">
+                <BarChart2 className="w-3 h-3 text-[#8B5CF6]" />
+                <span>{myRoom.listeners}</span>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/45 shrink-0" />
+          </button>
+        )}
+
+        {/* Inspiration Card */}
+        {showInspiration && (
+          <div className="pt-2 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-white/60">Inspiration</span>
+              <button
+                type="button"
+                onClick={() => setShowInspiration(false)}
+                aria-label="Dismiss inspiration"
+                className="text-white/45 hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="rounded-2xl bg-[#2B2540] border border-[#8B5CF6]/25 p-3.5 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#EC4899] flex items-center justify-center text-2xl shrink-0">
+                🏮
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-bold text-white truncate">🎉 រីករាយពិធីបុណ្យអុំទូក!</div>
+                <div className="text-[11px] text-white/70 truncate">
+                  💜 ចែករំលែកពេលវេលាដ៏ស្រស់ស្អាតជាមួយ MY HAPPY PLACE
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenCompose}
+                className="px-3.5 py-2 rounded-full border border-[#8B5CF6] bg-[#16151B]/50 hover:bg-[#8B5CF6] text-white text-xs font-bold whitespace-nowrap cursor-pointer transition-colors shrink-0"
+              >
+                Post now ❤️
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Pinned Post Preview */}
+        {pinnedPost && (
+          <div className="pt-2 space-y-2">
+            <div className="flex items-center justify-between text-xs text-white/60">
+              <span>📌 Pinned · {pinnedPost.timeAgo}</span>
+            </div>
+            <div className="rounded-2xl bg-[#222128] border border-white/10 p-3.5 space-y-2">
+              <p className="text-sm text-white/90">{pinnedPost.caption}</p>
+              {pinnedPost.imageBg && (
+                <div
+                  className="w-full h-36 rounded-xl flex items-center justify-center text-4xl"
+                  style={{ background: pinnedPost.imageBg }}
+                >
+                  {pinnedPost.imageEmoji ?? '✨'}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Friends & Family Cards */}
+      <section className="px-4 mt-5 space-y-2.5">
         <button
           type="button"
           onClick={onOpenFriends}
-          className="w-full rounded-2xl bg-[#F5F0FF] hover:bg-[#EAE0FF] transition-colors p-4 flex items-center gap-3 text-left cursor-pointer"
+          className="w-full rounded-2xl bg-[#222128] hover:bg-[#2B2A34] border border-white/5 transition-colors p-4 flex items-center gap-3 text-left cursor-pointer"
         >
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0"
@@ -3322,18 +5312,18 @@ function ProfileView({
             <UserPlus className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="font-bold text-sm text-[#251B3A] truncate">My Friends</div>
-            <div className="text-xs text-[#8B8298] truncate tabular-nums">
+            <div className="font-bold text-sm text-white truncate">My Friends</div>
+            <div className="text-xs text-white/55 truncate tabular-nums">
               {friendsCount} friends{friendRequestCount > 0 ? ` · ${friendRequestCount} requests` : ''}
             </div>
           </div>
-          <span className="text-xs font-bold text-[#8B5CF6]">Add friends</span>
+          <span className="text-xs font-bold text-[#A78BFA]">Add friends</span>
         </button>
 
         <button
           type="button"
           onClick={onOpenFamily}
-          className="w-full rounded-2xl bg-[#F5F0FF] hover:bg-[#EAE0FF] transition-colors p-4 flex items-center gap-3 text-left cursor-pointer"
+          className="w-full rounded-2xl bg-[#222128] hover:bg-[#2B2A34] border border-white/5 transition-colors p-4 flex items-center gap-3 text-left cursor-pointer"
         >
           <FamilyLogoBadge
             emblem={currentFamily?.emblem ?? '🏠'}
@@ -3344,29 +5334,27 @@ function ProfileView({
             size="sm"
           />
           <div className="flex-1 min-w-0">
-            <div className="font-bold text-sm text-[#251B3A] truncate">
+            <div className="font-bold text-sm text-white truncate">
               {currentFamily?.name ?? 'No Family yet'}
             </div>
-            <div className="text-xs text-[#8B8298] truncate tabular-nums">
+            <div className="text-xs text-white/55 truncate tabular-nums">
               {currentFamily
                 ? `${myRole} · Level ${currentFamily.level} · ${currentFamily.members.length} members`
                 : 'Tap to join or create a Family'}
             </div>
           </div>
-          <span className="text-xs font-bold text-[#8B5CF6]">Open</span>
+          <span className="text-xs font-bold text-[#A78BFA]">Open</span>
         </button>
       </section>
 
       {/* Gift History Section */}
-      <section className="px-5 mt-7">
+      <section className="px-4 mt-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-[#251B3A]">Gift History</h2>
-            <p className="text-[11px] text-[#8B8298]">Khmer traditional gifts sent &amp; received</p>
+            <h2 className="text-base font-bold text-white">Gift History</h2>
+            <p className="text-[11px] text-white/50">Khmer traditional gifts sent &amp; received</p>
           </div>
-          <span className="text-xs font-semibold text-[#8B5CF6] tabular-nums">
-            {filteredHistory.length} items
-          </span>
+          <span className="text-xs font-semibold text-[#A78BFA] tabular-nums">{filteredHistory.length} items</span>
         </div>
 
         <div className="flex items-center gap-2 mt-3">
@@ -3379,7 +5367,7 @@ function ProfileView({
                 type="button"
                 onClick={() => setHistoryFilter(filterKey)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
-                  active ? 'bg-[#8B5CF6] text-white' : 'bg-[#F5F0FF] text-[#251B3A] hover:bg-[#EAE0FF]'
+                  active ? 'bg-[#8B5CF6] text-white' : 'bg-[#222128] text-white/75 hover:bg-[#2B2A34]'
                 }`}
               >
                 {label}
@@ -3392,14 +5380,14 @@ function ProfileView({
           {filteredHistory.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl bg-white border border-[#F5F0FF] p-3 flex items-center gap-3"
+              className="rounded-2xl bg-[#222128] border border-white/5 p-3 flex items-center gap-3"
             >
-              <div className="w-11 h-11 rounded-xl bg-[#F5F0FF] flex items-center justify-center text-2xl shrink-0">
+              <div className="w-11 h-11 rounded-xl bg-[#2B2A34] flex items-center justify-center text-2xl shrink-0">
                 {item.emoji}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-sm text-[#251B3A] truncate">{item.giftName}</div>
-                <div className="text-[11px] text-[#8B8298] truncate">
+                <div className="font-bold text-sm text-white truncate">{item.giftName}</div>
+                <div className="text-[11px] text-white/50 truncate">
                   {item.isSent ? `Sent to ${item.peerName}` : `Received from ${item.peerName}`} ·{' '}
                   {formatTimestamp(item.timestamp)}
                 </div>
@@ -3407,21 +5395,113 @@ function ProfileView({
               <div className="text-right shrink-0">
                 <div
                   className={`text-xs font-bold tabular-nums ${
-                    item.isSent ? 'text-[#FF7EB6]' : 'text-[#8B5CF6]'
+                    item.isSent ? 'text-[#FF7EB6]' : 'text-[#A78BFA]'
                   }`}
                 >
                   {item.isSent ? `-💎 ${item.price}` : `+💎 ${item.price}`}
                 </div>
-                <div className="text-[10px] text-[#8B8298]">{item.isSent ? 'Sent' : 'Received'}</div>
+                <div className="text-[10px] text-white/45">{item.isSent ? 'Sent' : 'Received'}</div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <p className="text-[#8B8298] text-[11px] px-5 pt-5">
-        រូបភាពបង្ហាញក្នុង App បច្ចុប្បន្ន។ ការរក្សាទុក Online ត្រូវភ្ជាប់ Firebase Storage បន្ថែម។
-      </p>
+      {/* Edit Profile Modal */}
+      {showEditModal && (
+        <div
+          onClick={() => setShowEditModal(false)}
+          className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4"
+        >
+          <form
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const parsedInterests = interestsInput
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean);
+              onSave({
+                displayName: name.trim() || displayName,
+                bio: about,
+                occupation: occupation.trim() || userOccupation,
+                interests: parsedInterests.length > 0 ? parsedInterests : userInterests,
+                profilePhoto: avatar,
+                coverPhoto: cover,
+              });
+              setShowEditModal(false);
+              setSavedToast(true);
+              window.setTimeout(() => setSavedToast(false), 1800);
+            }}
+            className="w-full max-w-md rounded-3xl bg-[#222128] border border-white/10 p-5 space-y-3 text-white shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-extrabold">Edit Profile</h3>
+              <button type="button" onClick={() => setShowEditModal(false)} className="text-white/55 hover:text-white cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <label className="block rounded-2xl bg-[#16151B] border border-white/10 p-3 text-xs text-white/75 cursor-pointer">
+              <span className="font-bold text-[#A78BFA]">Tap to change Cover Photo</span>
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => pickFile(e, setCover)} />
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Display name"
+              className="w-full min-h-[42px] px-3.5 rounded-xl bg-[#16151B] border border-white/10 text-sm text-white"
+            />
+            <input
+              type="text"
+              value={about}
+              onChange={(e) => setAbout(e.target.value)}
+              placeholder="Bio / handle"
+              className="w-full min-h-[42px] px-3.5 rounded-xl bg-[#16151B] border border-white/10 text-sm text-white"
+            />
+            <input
+              type="text"
+              value={occupation}
+              onChange={(e) => setOccupation(e.target.value)}
+              placeholder="Occupation"
+              className="w-full min-h-[42px] px-3.5 rounded-xl bg-[#16151B] border border-white/10 text-sm text-white"
+            />
+            <input
+              type="text"
+              value={interestsInput}
+              onChange={(e) => setInterestsInput(e.target.value)}
+              placeholder="Interests (comma separated)"
+              className="w-full min-h-[42px] px-3.5 rounded-xl bg-[#16151B] border border-white/10 text-sm text-white"
+            />
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="flex-1 min-h-[42px] rounded-full bg-[#2B2A34] text-white font-bold text-xs cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 min-h-[42px] rounded-full bg-[#8B5CF6] text-white font-bold text-xs cursor-pointer"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Floating Compose Moment FAB */}
+      <button
+        type="button"
+        onClick={onOpenCompose}
+        aria-label="Create Moment"
+        className="fixed bottom-24 right-5 md:bottom-8 md:right-8 z-30 w-13 h-13 rounded-full text-white flex items-center justify-center shadow-xl cursor-pointer transition-transform hover:scale-105"
+        style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)' }}
+      >
+        <Feather className="w-5 h-5" />
+      </button>
     </div>
   );
 }
@@ -3605,10 +5685,10 @@ function FamilyView({
             setActiveTab('mine');
           }
         }}
-        className="rounded-2xl bg-white border border-[#8B5CF6]/20 p-4 space-y-3.5 shadow-sm"
+        className="rounded-2xl bg-[#222128] border border-white/10 p-4 space-y-3.5 shadow-lg text-white"
       >
         <div className="flex items-center justify-between">
-          <span className="font-bold text-sm text-[#251B3A]">
+          <span className="font-bold text-sm text-white">
             {isEditing ? 'Customize Family Logo' : 'Create Family & Logo'}
           </span>
           <button
@@ -3617,13 +5697,13 @@ function FamilyView({
               setShowLogoBuilder(false);
               setEditingFamilyId(null);
             }}
-            className="min-h-[44px] min-w-[44px] -mr-2 flex items-center justify-center text-[#8B8298] cursor-pointer"
+            className="min-h-[44px] min-w-[44px] -mr-2 flex items-center justify-center text-white/55 hover:text-white cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="rounded-2xl bg-[#F5F0FF] p-3.5 flex items-center gap-3.5">
+        <div className="rounded-2xl bg-[#16151B] border border-white/10 p-3.5 flex items-center gap-3.5">
           <FamilyLogoBadge
             emblem={resolvedEmblem}
             color={activePalette.primary}
@@ -3633,9 +5713,9 @@ function FamilyView({
             size="xl"
           />
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-bold text-[#251B3A]">Live Logo Preview</div>
+            <div className="text-xs font-bold text-white">Live Logo Preview</div>
             <div className="flex flex-wrap items-center gap-2 mt-1.5">
-              <label className="min-h-[36px] px-3 py-1.5 rounded-xl bg-white text-[#8B5CF6] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer">
+              <label className="min-h-[36px] px-3 py-1.5 rounded-xl bg-[#2B2A34] text-[#A78BFA] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer">
                 <ImagePlus className="w-3.5 h-3.5" />
                 <span>Upload photo</span>
                 <input type="file" accept="image/*" className="hidden" onChange={pickLogoFile} />
@@ -3644,7 +5724,7 @@ function FamilyView({
                 <button
                   type="button"
                   onClick={() => setLogoImage(null)}
-                  className="min-h-[36px] px-3 py-1.5 rounded-xl bg-white text-[#D9386A] text-xs font-bold cursor-pointer"
+                  className="min-h-[36px] px-3 py-1.5 rounded-xl bg-[#2B2A34] text-[#FF5C8A] text-xs font-bold cursor-pointer"
                 >
                   Use crest
                 </button>
@@ -3660,20 +5740,20 @@ function FamilyView({
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Family name (e.g. Lotus Vibes)"
-              className="w-full min-h-[44px] px-3.5 rounded-xl border border-[#8B5CF6]/30 text-sm"
+              className="w-full min-h-[44px] px-3.5 rounded-xl border border-white/15 bg-[#16151B] text-white placeholder:text-white/40 text-sm"
             />
             <input
               type="text"
               value={newMotto}
               onChange={(e) => setNewMotto(e.target.value)}
               placeholder="Family motto"
-              className="w-full min-h-[44px] px-3.5 rounded-xl border border-[#8B5CF6]/30 text-sm"
+              className="w-full min-h-[44px] px-3.5 rounded-xl border border-white/15 bg-[#16151B] text-white placeholder:text-white/40 text-sm"
             />
           </>
         )}
 
         <div>
-          <div className="text-xs font-bold text-[#251B3A] mb-1.5">Logo shape</div>
+          <div className="text-xs font-bold text-white/80 mb-1.5">Logo shape</div>
           <div className="grid grid-cols-3 gap-2">
             {(
               [
@@ -3687,7 +5767,7 @@ function FamilyView({
                 type="button"
                 onClick={() => setLogoShape(s.id)}
                 className={`min-h-[44px] rounded-xl text-xs font-bold cursor-pointer transition-colors ${
-                  logoShape === s.id ? 'bg-[#8B5CF6] text-white' : 'bg-[#F5F0FF] text-[#251B3A]'
+                  logoShape === s.id ? 'bg-[#8B5CF6] text-white' : 'bg-[#2B2A34] text-white/75'
                 }`}
               >
                 {s.label}
@@ -3697,7 +5777,7 @@ function FamilyView({
         </div>
 
         <div>
-          <div className="text-xs font-bold text-[#251B3A] mb-1.5">Crest symbol or initials</div>
+          <div className="text-xs font-bold text-white/80 mb-1.5">Crest symbol or initials</div>
           <div className="flex flex-wrap gap-2">
             {['🌸', '👑', '🐉', '✨', '🔥', '💎', '🪷'].map((emblem) => {
               const active = !useMonogram && newEmblem === emblem;
@@ -3711,7 +5791,7 @@ function FamilyView({
                     setLogoImage(null);
                   }}
                   className={`w-11 h-11 rounded-full text-xl flex items-center justify-center cursor-pointer ${
-                    active ? 'bg-[#8B5CF6]' : 'bg-[#F5F0FF]'
+                    active ? 'bg-[#8B5CF6]' : 'bg-[#2B2A34]'
                   }`}
                 >
                   {emblem}
@@ -3725,7 +5805,7 @@ function FamilyView({
                 setLogoImage(null);
               }}
               className={`min-h-[44px] px-3.5 rounded-full text-xs font-extrabold cursor-pointer ${
-                useMonogram ? 'bg-[#8B5CF6] text-white' : 'bg-[#F5F0FF] text-[#251B3A]'
+                useMonogram ? 'bg-[#8B5CF6] text-white' : 'bg-[#2B2A34] text-white/80'
               }`}
             >
               ABC Initials
@@ -3734,7 +5814,7 @@ function FamilyView({
         </div>
 
         <div>
-          <div className="text-xs font-bold text-[#251B3A] mb-1.5">Logo gradient</div>
+          <div className="text-xs font-bold text-white/80 mb-1.5">Logo gradient</div>
           <div className="flex gap-2.5">
             {FAMILY_LOGO_PALETTES.map((palette, idx) => (
               <button
@@ -3757,7 +5837,7 @@ function FamilyView({
               setShowLogoBuilder(false);
               setEditingFamilyId(null);
             }}
-            className="min-h-[44px] px-4 rounded-xl bg-[#F5F0FF] text-[#251B3A] font-semibold text-sm cursor-pointer"
+            className="min-h-[44px] px-4 rounded-xl bg-[#2B2A34] text-white font-semibold text-sm cursor-pointer"
           >
             Cancel
           </button>
@@ -3773,32 +5853,32 @@ function FamilyView({
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFBFF] flex flex-col">
-      <header className="bg-white border-b border-[#F5F0FF] px-3 py-2.5 flex items-center gap-3 sticky top-0 z-20">
+    <div className="min-h-screen bg-[#16151B] text-white flex flex-col">
+      <header className="bg-[#16151B]/95 backdrop-blur border-b border-white/10 px-3 py-2.5 flex items-center gap-3 sticky top-0 z-20">
         <button
           type="button"
           onClick={onBack}
           aria-label="Back"
-          className="w-11 h-11 rounded-full flex items-center justify-center text-[#251B3A] hover:bg-[#F5F0FF] cursor-pointer"
+          className="w-11 h-11 rounded-full flex items-center justify-center text-white hover:bg-[#222128] cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-[#251B3A] font-extrabold text-[19px]">Family</h1>
-          <p className="text-[11px] text-[#8B8298]">Connect with your community</p>
+          <h1 className="text-white font-extrabold text-[19px]">Family</h1>
+          <p className="text-[11px] text-white/55">Connect with your community</p>
         </div>
-        <span className="text-xs font-bold text-[#8B5CF6] px-3 py-1.5 rounded-full bg-[#F5F0FF] tabular-nums">
+        <span className="text-xs font-bold text-[#70D9FF] px-3 py-1.5 rounded-full bg-[#222128] tabular-nums">
           💎 {diamonds}
         </span>
       </header>
 
       <div className="max-w-3xl w-full mx-auto px-5 py-5 space-y-5">
-        <div className="grid grid-cols-2 gap-2 p-1 bg-[#F5F0FF] rounded-2xl">
+        <div className="grid grid-cols-2 gap-2 p-1 bg-[#222128] rounded-2xl border border-white/5">
           <button
             type="button"
             onClick={() => setActiveTab('mine')}
             className={`min-h-[44px] rounded-xl text-sm font-bold cursor-pointer transition-colors ${
-              activeTab === 'mine' ? 'bg-[#8B5CF6] text-white' : 'text-[#251B3A]'
+              activeTab === 'mine' ? 'bg-[#8B5CF6] text-white' : 'text-white/70'
             }`}
           >
             My Family
@@ -3807,7 +5887,7 @@ function FamilyView({
             type="button"
             onClick={() => setActiveTab('explore')}
             className={`min-h-[44px] rounded-xl text-sm font-bold cursor-pointer transition-colors ${
-              activeTab === 'explore' ? 'bg-[#8B5CF6] text-white' : 'text-[#251B3A]'
+              activeTab === 'explore' ? 'bg-[#8B5CF6] text-white' : 'text-white/70'
             }`}
           >
             Explore Families
@@ -3868,8 +5948,8 @@ function FamilyView({
 
               <section className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-[#251B3A] text-base">Family Wall</h3>
-                  <span className="text-xs text-[#8B5CF6] font-semibold tabular-nums">
+                  <h3 className="font-bold text-white text-base">Family Wall</h3>
+                  <span className="text-xs text-[#A78BFA] font-semibold tabular-nums">
                     {myFamily.announcements.length} posts
                   </span>
                 </div>
@@ -3887,7 +5967,7 @@ function FamilyView({
                     value={wallInput}
                     onChange={(e) => setWallInput(e.target.value)}
                     placeholder="Share an update with family..."
-                    className="flex-1 min-h-[44px] px-3.5 rounded-xl border border-[#8B5CF6]/30 bg-white text-sm"
+                    className="flex-1 min-h-[44px] px-3.5 rounded-xl border border-white/15 bg-[#222128] text-white placeholder:text-white/40 text-sm"
                   />
                   <button
                     type="submit"
@@ -3899,7 +5979,7 @@ function FamilyView({
                 </form>
                 <div className="space-y-2">
                   {myFamily.announcements.map((note, idx) => (
-                    <div key={idx} className="rounded-xl bg-[#F5F0FF] px-3.5 py-2.5 text-sm text-[#251B3A]">
+                    <div key={idx} className="rounded-xl bg-[#222128] border border-white/5 px-3.5 py-2.5 text-sm text-white/90">
                       {note}
                     </div>
                   ))}
@@ -3908,19 +5988,19 @@ function FamilyView({
 
               <section className="space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-[#251B3A] text-base">Members</h3>
-                  <span className="text-xs text-[#8B8298] tabular-nums">{myFamily.members.length} people</span>
+                  <h3 className="font-bold text-white text-base">Members</h3>
+                  <span className="text-xs text-white/55 tabular-nums">{myFamily.members.length} people</span>
                 </div>
                 <div className="space-y-2">
                   {myFamily.members.map((member) => (
                     <div
                       key={member.name}
-                      className="rounded-2xl bg-white border border-[#F5F0FF] p-3 flex items-center gap-3"
+                      className="rounded-2xl bg-[#222128] border border-white/5 p-3 flex items-center gap-3"
                     >
                       <AvatarBadge name={member.name} size="sm" />
                       <div className="flex-1 min-w-0">
-                        <div className="font-bold text-sm text-[#251B3A] truncate">{member.name}</div>
-                        <div className="text-xs text-[#8B8298] tabular-nums">
+                        <div className="font-bold text-sm text-white truncate">{member.name}</div>
+                        <div className="text-xs text-white/55 tabular-nums">
                           {member.role} · {member.points} pts
                         </div>
                       </div>
@@ -3928,7 +6008,7 @@ function FamilyView({
                         <button
                           type="button"
                           onClick={() => onChatMember(member.name)}
-                          className="min-h-[44px] px-3.5 rounded-xl text-xs font-bold text-[#8B5CF6] hover:bg-[#F5F0FF] cursor-pointer"
+                          className="min-h-[40px] px-3.5 rounded-xl text-xs font-bold text-[#A78BFA] bg-[#2B2A34] hover:bg-[#383645] cursor-pointer"
                         >
                           Chat
                         </button>
@@ -3944,21 +6024,21 @@ function FamilyView({
                   onLeaveFamily(myFamily.id);
                   setActiveTab('explore');
                 }}
-                className="w-full min-h-[44px] rounded-full border border-[#D9386A]/40 text-[#D9386A] font-bold text-sm cursor-pointer"
+                className="w-full min-h-[44px] rounded-full border border-[#FF5C8A]/40 text-[#FF5C8A] font-bold text-sm cursor-pointer"
               >
                 Leave Family
               </button>
             </div>
           ) : (
-            <div className="rounded-2xl bg-[#F5F0FF] p-6 text-center space-y-3">
+            <div className="rounded-2xl bg-[#222128] border border-white/5 p-6 text-center space-y-3">
               <div className="text-4xl">🏠</div>
-              <div className="font-bold text-[#251B3A]">You haven't joined a Family yet</div>
-              <p className="text-xs text-[#8B8298]">Join an existing community or create your own crew.</p>
+              <div className="font-bold text-white">You haven't joined a Family yet</div>
+              <p className="text-xs text-white/55">Join an existing community or create your own crew.</p>
               <div className="flex items-center justify-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setActiveTab('explore')}
-                  className="min-h-[44px] px-4 rounded-xl bg-white text-[#8B5CF6] font-bold text-xs cursor-pointer"
+                  className="min-h-[44px] px-4 rounded-xl bg-[#2B2A34] text-[#A78BFA] font-bold text-xs cursor-pointer"
                 >
                   Explore
                 </button>
@@ -3998,7 +6078,7 @@ function FamilyView({
               {families.map((family) => {
                 const isMine = family.id === myFamilyId;
                 return (
-                  <div key={family.id} className="rounded-2xl bg-white border border-[#F5F0FF] p-4 space-y-2">
+                  <div key={family.id} className="rounded-2xl bg-[#222128] border border-white/5 p-4 space-y-2">
                     <div className="flex items-center gap-3">
                       <FamilyLogoBadge
                         emblem={family.emblem}
@@ -4009,8 +6089,8 @@ function FamilyView({
                         size="md"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="font-extrabold text-[#251B3A] text-base truncate">{family.name}</div>
-                        <div className="text-xs text-[#8B8298] tabular-nums">
+                        <div className="font-extrabold text-white text-base truncate">{family.name}</div>
+                        <div className="text-xs text-white/55 tabular-nums">
                           Level {family.level} · {family.members.length} members · {family.points} pts
                         </div>
                       </div>
@@ -4020,14 +6100,14 @@ function FamilyView({
                           onJoinFamily(family.id);
                           setActiveTab('mine');
                         }}
-                        className={`min-h-[44px] px-4 rounded-full font-bold text-xs cursor-pointer ${
-                          isMine ? 'bg-[#F5F0FF] text-[#8B5CF6]' : 'bg-[#8B5CF6] text-white'
+                        className={`min-h-[40px] px-4 rounded-full font-bold text-xs cursor-pointer ${
+                          isMine ? 'bg-[#2B2A34] text-[#A78BFA]' : 'bg-[#8B5CF6] text-white'
                         }`}
                       >
                         {isMine ? 'Joined' : 'Join'}
                       </button>
                     </div>
-                    <p className="text-xs text-[#8B8298]">{family.motto}</p>
+                    <p className="text-xs text-white/60">{family.motto}</p>
                   </div>
                 );
               })}
@@ -4312,19 +6392,19 @@ function FriendsView({
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFBFF] pb-12">
-      <div className="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-[#F5F0FF] px-4 py-3 flex items-center gap-3">
+    <div className="min-h-screen bg-[#16151B] text-white pb-12">
+      <div className="sticky top-0 z-20 bg-[#16151B]/95 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center gap-3">
         <button
           type="button"
           onClick={onBack}
           aria-label="Back"
-          className="min-h-[44px] min-w-[44px] rounded-full flex items-center justify-center text-[#251B3A] hover:bg-[#F5F0FF] cursor-pointer"
+          className="min-h-[44px] min-w-[44px] rounded-full flex items-center justify-center text-white hover:bg-[#222128] cursor-pointer"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-extrabold text-[#251B3A]">Add Friends</h1>
-          <p className="text-xs text-[#8B8298] tabular-nums">
+          <h1 className="text-lg font-extrabold text-white">Add Friends</h1>
+          <p className="text-xs text-white/55 tabular-nums">
             {friends.length} friends · {friendRequests.length} requests
           </p>
         </div>
@@ -4333,11 +6413,11 @@ function FriendsView({
       <div className="max-w-3xl mx-auto px-5 pt-5 space-y-6">
         <form
           onSubmit={handleQuickAddSubmit}
-          className="rounded-[22px] bg-[#F5F0FF] p-4 space-y-3"
+          className="rounded-[22px] bg-[#222128] border border-white/10 p-4 space-y-3"
         >
           <div>
-            <h2 className="font-extrabold text-[#251B3A] text-sm">Add by name or @username</h2>
-            <p className="text-xs text-[#8B8298] mt-0.5">
+            <h2 className="font-extrabold text-white text-sm">Add by name or @username</h2>
+            <p className="text-xs text-white/55 mt-0.5">
               Connect directly with friends on MY HAPPY PLACE
             </p>
           </div>
@@ -4347,18 +6427,18 @@ function FriendsView({
               value={customFriendInput}
               onChange={(e) => setCustomFriendInput(e.target.value)}
               placeholder="Enter friend's name or @handle (e.g. Koko)"
-              className="flex-1 min-h-[44px] px-3.5 rounded-xl border border-[#8B5CF6]/25 bg-white text-sm text-[#251B3A] placeholder:text-[#8B8298] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
+              className="flex-1 min-h-[44px] px-3.5 rounded-xl border border-white/15 bg-[#16151B] text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
             />
             <button
               type="submit"
-              className="min-h-[44px] px-5 rounded-xl bg-[#8B5CF6] hover:bg-[#7C4DFF] text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap transition-colors"
+              className="min-h-[44px] px-5 rounded-xl bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap transition-colors"
             >
               <UserPlus className="w-4 h-4" />
               <span>Add friend</span>
             </button>
           </div>
           {feedback && (
-            <div role="status" className="text-xs font-semibold text-[#5B6EE1] flex items-center gap-1.5">
+            <div role="status" className="text-xs font-semibold text-[#A78BFA] flex items-center gap-1.5">
               <Check className="w-4 h-4 shrink-0" />
               <span>{feedback}</span>
             </div>
@@ -4366,20 +6446,20 @@ function FriendsView({
         </form>
 
         <div className="relative flex items-center">
-          <Search className="w-4 h-4 text-[#8B5CF6] absolute left-3.5 pointer-events-none" />
+          <Search className="w-4 h-4 text-[#A78BFA] absolute left-3.5 pointer-events-none" />
           <input
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Filter people by name, @handle, or vibe..."
-            className="w-full min-h-[44px] pl-10 pr-10 rounded-2xl bg-[#F5F0FF]/70 border border-[#8B5CF6]/20 text-sm text-[#251B3A] placeholder:text-[#8B8298] focus:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
+            className="w-full min-h-[44px] pl-10 pr-10 rounded-2xl bg-[#222128] border border-white/10 text-sm text-white placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]"
           />
           {searchQuery.length > 0 && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
               aria-label="Clear filter"
-              className="absolute right-1.5 min-h-[36px] min-w-[36px] rounded-full flex items-center justify-center text-[#8B8298] hover:text-[#251B3A] cursor-pointer"
+              className="absolute right-1.5 min-h-[36px] min-w-[36px] rounded-full flex items-center justify-center text-white/55 hover:text-white cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -4389,8 +6469,8 @@ function FriendsView({
         {requestPeople.length > 0 && (
           <section className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-[#251B3A] text-base">Friend Requests</h2>
-              <span className="text-xs font-semibold text-[#8B5CF6] tabular-nums">
+              <h2 className="font-bold text-white text-base">Friend Requests</h2>
+              <span className="text-xs font-semibold text-[#A78BFA] tabular-nums">
                 {requestPeople.length} pending
               </span>
             </div>
@@ -4398,12 +6478,12 @@ function FriendsView({
               {requestPeople.map((person) => (
                 <div
                   key={person.name}
-                  className="rounded-2xl bg-white border border-[#F5F0FF] p-3.5 flex flex-wrap items-center gap-3 shadow-xs"
+                  className="rounded-2xl bg-[#222128] border border-white/5 p-3.5 flex flex-wrap items-center gap-3"
                 >
                   <AvatarBadge name={person.name} size="sm" />
                   <div className="flex-1 min-w-[140px]">
-                    <div className="font-bold text-sm text-[#251B3A] truncate">{person.name}</div>
-                    <div className="text-xs text-[#8B8298] truncate">
+                    <div className="font-bold text-sm text-white truncate">{person.name}</div>
+                    <div className="text-xs text-white/55 truncate">
                       {person.handle} · {person.mutualCount} mutual friends
                     </div>
                   </div>
@@ -4414,7 +6494,7 @@ function FriendsView({
                         onAcceptRequest(person.name);
                         setFeedback(`Accepted ${person.name}'s friend request!`);
                       }}
-                      className="min-h-[40px] px-4 rounded-full bg-[#8B5CF6] hover:bg-[#7C4DFF] text-white font-bold text-xs inline-flex items-center gap-1 cursor-pointer transition-colors"
+                      className="min-h-[40px] px-4 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-bold text-xs inline-flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <Check className="w-3.5 h-3.5" />
                       <span>Accept</span>
@@ -4422,7 +6502,7 @@ function FriendsView({
                     <button
                       type="button"
                       onClick={() => onDeclineRequest(person.name)}
-                      className="min-h-[40px] px-3.5 rounded-full bg-[#F5F0FF] hover:bg-[#EAE0FF] text-[#251B3A] font-semibold text-xs cursor-pointer transition-colors"
+                      className="min-h-[40px] px-3.5 rounded-full bg-[#2B2A34] hover:bg-[#383645] text-white/80 font-semibold text-xs cursor-pointer transition-colors"
                     >
                       Decline
                     </button>
@@ -4435,11 +6515,11 @@ function FriendsView({
 
         <section className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-[#251B3A] text-base">People You May Know</h2>
-            <span className="text-xs text-[#8B8298] tabular-nums">{discoverPeople.length} suggested</span>
+            <h2 className="font-bold text-white text-base">People You May Know</h2>
+            <span className="text-xs text-white/55 tabular-nums">{discoverPeople.length} suggested</span>
           </div>
           {discoverPeople.length === 0 ? (
-            <div className="rounded-2xl bg-[#F5F0FF]/60 p-4 text-xs text-[#8B8298]">
+            <div className="rounded-2xl bg-[#222128] p-4 text-xs text-white/55">
               {normalizedQuery
                 ? `No suggested people matched "${searchQuery.trim()}". Try adding them directly above.`
                 : 'You have added all suggested people! Add anyone else by name or @handle above.'}
@@ -4449,12 +6529,12 @@ function FriendsView({
               {discoverPeople.map((person) => (
                 <div
                   key={person.name}
-                  className="rounded-2xl bg-white border border-[#F5F0FF] p-3.5 flex flex-wrap items-center gap-3 shadow-xs"
+                  className="rounded-2xl bg-[#222128] border border-white/5 p-3.5 flex flex-wrap items-center gap-3"
                 >
                   <AvatarBadge name={person.name} size="sm" />
                   <div className="flex-1 min-w-[140px]">
-                    <div className="font-bold text-sm text-[#251B3A] truncate">{person.name}</div>
-                    <div className="text-xs text-[#8B8298] truncate">
+                    <div className="font-bold text-sm text-white truncate">{person.name}</div>
+                    <div className="text-xs text-white/55 truncate">
                       {person.handle} · {person.vibe}
                     </div>
                   </div>
@@ -4465,7 +6545,7 @@ function FriendsView({
                         onAddFriend(person.name);
                         setFeedback(`Added ${person.name} to your friends!`);
                       }}
-                      className="min-h-[40px] px-4 rounded-full bg-[#8B5CF6] hover:bg-[#7C4DFF] text-white font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+                      className="min-h-[40px] px-4 rounded-full bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors"
                     >
                       <UserPlus className="w-3.5 h-3.5" />
                       <span>Add friend</span>
@@ -4474,7 +6554,7 @@ function FriendsView({
                       type="button"
                       onClick={() => onChat(person.name)}
                       aria-label={`Chat with ${person.name}`}
-                      className="min-h-[40px] min-w-[40px] rounded-full bg-[#F5F0FF] text-[#8B5CF6] flex items-center justify-center cursor-pointer"
+                      className="min-h-[40px] min-w-[40px] rounded-full bg-[#2B2A34] text-[#A78BFA] flex items-center justify-center cursor-pointer"
                     >
                       <MessageCircle className="w-4 h-4" />
                     </button>
@@ -4487,11 +6567,11 @@ function FriendsView({
 
         <section className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-[#251B3A] text-base">My Friends</h2>
-            <span className="text-xs font-semibold text-[#8B5CF6] tabular-nums">{friendPeople.length}</span>
+            <h2 className="font-bold text-white text-base">My Friends</h2>
+            <span className="text-xs font-semibold text-[#A78BFA] tabular-nums">{friendPeople.length}</span>
           </div>
           {friendPeople.length === 0 ? (
-            <div className="rounded-2xl bg-[#F5F0FF]/60 p-4 text-xs text-[#8B8298]">
+            <div className="rounded-2xl bg-[#222128] p-4 text-xs text-white/55">
               No friends match this filter yet.
             </div>
           ) : (
@@ -4499,12 +6579,12 @@ function FriendsView({
               {friendPeople.map((person) => (
                 <div
                   key={person.name}
-                  className="rounded-2xl bg-white border border-[#F5F0FF] p-3.5 flex flex-wrap items-center gap-3 shadow-xs"
+                  className="rounded-2xl bg-[#222128] border border-white/5 p-3.5 flex flex-wrap items-center gap-3"
                 >
                   <AvatarBadge name={person.name} size="sm" />
                   <div className="flex-1 min-w-[140px]">
-                    <div className="font-bold text-sm text-[#251B3A] truncate">{person.name}</div>
-                    <div className="text-xs text-[#8B8298] truncate">
+                    <div className="font-bold text-sm text-white truncate">{person.name}</div>
+                    <div className="text-xs text-white/55 truncate">
                       {person.handle} · {person.isOnline ? 'Online' : 'Offline'} · {person.vibe}
                     </div>
                   </div>
@@ -4512,7 +6592,7 @@ function FriendsView({
                     <button
                       type="button"
                       onClick={() => onChat(person.name)}
-                      className="min-h-[40px] px-4 rounded-full bg-[#F5F0FF] hover:bg-[#EAE0FF] text-[#8B5CF6] font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+                      className="min-h-[40px] px-4 rounded-full bg-[#2B2A34] hover:bg-[#383645] text-[#A78BFA] font-bold text-xs inline-flex items-center gap-1.5 cursor-pointer transition-colors"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
                       <span>Chat</span>
@@ -4524,7 +6604,7 @@ function FriendsView({
                         setFeedback(`Removed ${person.name} from friends.`);
                       }}
                       aria-label={`Remove ${person.name}`}
-                      className="min-h-[40px] min-w-[40px] rounded-full bg-[#F5F0FF]/70 hover:bg-[#FFE8EF] text-[#8B8298] hover:text-[#D93B6B] flex items-center justify-center cursor-pointer transition-colors"
+                      className="min-h-[40px] min-w-[40px] rounded-full bg-[#2B2A34] hover:bg-[#FF5C8A]/20 text-white/60 hover:text-[#FF5C8A] flex items-center justify-center cursor-pointer transition-colors"
                     >
                       <UserMinus className="w-4 h-4" />
                     </button>
