@@ -3532,6 +3532,8 @@ private fun VoicePartyRoomScreen(
     var lastReaction by remember { mutableStateOf<String?>(null) }
     var showReactionTray by remember { mutableStateOf(false) }
     var showGiftSheet by remember { mutableStateOf(false) }
+    var showPartyChallengeDialog by remember { mutableStateOf(false) }
+    var challengeLevel by remember { mutableIntStateOf(1) }
     var showBgSheet by remember { mutableStateOf(false) }
     var showOffMicCard by remember { mutableStateOf(true) }
     var showRoomMenu by remember { mutableStateOf(false) }
@@ -3997,7 +3999,7 @@ private fun VoicePartyRoomScreen(
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(Color(0x55000000))
                                 .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                                .clickable { showGiftSheet = true }
+                                .clickable { showPartyChallengeDialog = true }
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -4661,6 +4663,154 @@ private fun VoicePartyRoomScreen(
                     Icon(Icons.Default.CardGiftcard, null, tint = Color.White)
                     Spacer(Modifier.width(8.dp))
                     Text("Send ${selectedGift.name} (💎 ${selectedGift.price})", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+
+    if (showPartyChallengeDialog) {
+        Dialog(
+            onDismissRequest = { showPartyChallengeDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                    .heightIn(max = 680.dp),
+                shape = RoundedCornerShape(24.dp),
+                color = Color(0xFF1B172B),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("👑", fontSize = 18.sp)
+                            Text("Party Challenge", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 17.sp)
+                        }
+                        IconButton(onClick = { showPartyChallengeDialog = false }) {
+                            Icon(Icons.Default.Close, contentDescription = "Close", tint = Muted)
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+
+                    // Level selector 1 to 10
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        for (lvl in 1..10) {
+                            val active = challengeLevel == lvl
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (active) Purple else DarkSurface2)
+                                    .clickable { challengeLevel = lvl }
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("Level $lvl", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(14.dp))
+
+                    // Chest graphic & progress
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(Brush.linearGradient(listOf(Color(0xFF2D1E4E), Color(0xFF151128))))
+                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(18.dp))
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Level $challengeLevel of 10", color = Color(0xFFFDE68A), fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.height(4.dp))
+                            Text("🧰", fontSize = 42.sp)
+                            Spacer(Modifier.height(4.dp))
+                            Text("Chest Unboxing Rewards", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+                            Text("${challengeLevel * 1250} / ${challengeLevel * 4000} Room Points", color = Muted, fontSize = 11.sp)
+                            Spacer(Modifier.height(10.dp))
+                            LinearProgressIndicator(
+                                progress = ((challengeLevel * 1250f) / (challengeLevel * 4000f)).coerceIn(0f, 1f),
+                                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+                                color = Color(0xFFFBBF24),
+                                trackColor = Color.White.copy(alpha = 0.15f)
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(14.dp))
+
+                    Text("Unboxing rewards (Level $challengeLevel)", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color.White)
+                    Spacer(Modifier.height(8.dp))
+
+                    val rewardItems = listOf(
+                        Triple("Jellyfish", "🪼", 59 + challengeLevel * 10),
+                        Triple("Magnifying Glass", "🔍", 9 + challengeLevel * 5),
+                        Triple("Gold Ring", "💍", 199 + challengeLevel * 25),
+                        Triple("Pinwheel", "🎡", 129 + challengeLevel * 15),
+                        Triple("Fireworks", "🎆", 1592 + challengeLevel * 100),
+                        Triple("Bugatti Supercar", "🏎️", 15992 + challengeLevel * 1000)
+                    )
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        rewardItems.chunked(3).forEach { rowItems ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                rowItems.forEach { (name, emoji, price) ->
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(DarkSurface2)
+                                            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
+                                            .padding(10.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text(emoji, fontSize = 24.sp)
+                                            Spacer(Modifier.height(4.dp))
+                                            Text(name, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                            Text("💎 $price", color = Color(0xFF70D9FF), fontWeight = FontWeight.SemiBold, fontSize = 10.sp)
+                                        }
+                                    }
+                                }
+                                if (rowItems.size < 3) {
+                                    Spacer(Modifier.weight(1.0f * (3 - rowItems.size)))
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(14.dp))
+
+                    Button(
+                        onClick = {
+                            lastGiftBanner = "✨ Unboxed Level $challengeLevel Party Chest rewards!"
+                            showPartyChallengeDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth().height(46.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFBBF24))
+                    ) {
+                        Text("Claim Level $challengeLevel Reward 🎁", color = Color(0xFF1A122E), fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                    }
                 }
             }
         }

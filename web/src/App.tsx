@@ -3433,6 +3433,8 @@ function VoicePartyRoomView({
   const [lastReaction, setLastReaction] = useState<string | null>(null);
   const [showReactionTray, setShowReactionTray] = useState(false);
   const [showGiftDrawer, setShowGiftDrawer] = useState(false);
+  const [showPartyChallenge, setShowPartyChallenge] = useState(false);
+  const [challengeLevel, setChallengeLevel] = useState<number>(1);
   const [showBgDrawer, setShowBgDrawer] = useState(false);
   const [showOffMicModal, setShowOffMicModal] = useState(true);
   const [showRoomMenu, setShowRoomMenu] = useState(false);
@@ -4070,9 +4072,9 @@ function VoicePartyRoomView({
           </div>
           <button
             type="button"
-            onClick={() => setShowGiftDrawer(true)}
+            onClick={() => setShowPartyChallenge(true)}
             className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/35 border border-white/10 cursor-pointer shrink-0"
-            title="Send gifts to level up chest"
+            title="Party Challenge - Level 1 to 10"
           >
             <span className="text-sm leading-none">🧰</span>
             <span className="w-12 h-2 rounded-full bg-white/15 overflow-hidden">
