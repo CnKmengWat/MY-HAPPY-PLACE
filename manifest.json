@@ -1,0 +1,22 @@
+{
+  "name": "NAN PARTY",
+  "short_name": "NAN PARTY",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c0914",
+  "theme_color": "#120b20",
+  "description": "ជួបមិត្តថ្មី និងកម្សាន្តជាមួយគ្នា",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
